@@ -1,0 +1,7 @@
+*.o
+kernel/fbos.ld
+/fbos
+.cache
+
+# You can generate it with Bear: `$ bear -- make`.
+compile_commands.json
