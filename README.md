@@ -17,8 +17,8 @@ In order to build `fbos` you only need GCC. That being said, if you are not on a
 RISC-V system you will also need cross compilation tools for it (check your
 distribution for this, on openSUSE I simply installed `cross-riscv64-gcc14`).
 With that installed, simply set the `CROSS_COMPILE` environment variable as
-you'd do for building the kernel (e.g. in my case, using openSUSE, I set it to
-`riscv64-suse-linux-`). After all of that, just:
+you'd do for building the Linux kernel (e.g. in my case, using openSUSE, I set
+it to `riscv64-suse-linux-`). After all of that, just:
 
 ```
 $ make

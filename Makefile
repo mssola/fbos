@@ -17,8 +17,8 @@ endif
 # I did not go too much into the rabbit hole of platform-specific flags. Hence
 # no `-mcpu`, no `-mtune`, no funny business.
 
-CC   = $(CROSS_COMPILE)gcc
-LD   = $(CROSS_COMPILE)ld
+CC    = $(CROSS_COMPILE)gcc$(CC_SUFFIX)
+LD    = $(CROSS_COMPILE)ld
 QEMU ?= qemu-system-riscv64
 
 ISA        ?= rv64imafdc_zicntr_zicsr_zifencei_zihpm_zca_zcd_zba_zbb
@@ -88,3 +88,7 @@ gdb:
 .PHONY: clean
 clean:
 	$(Q) rm -f $(OBJ) $(KRNL) $(LINKER)
+
+.PHONY: lint
+lint:
+	$(Q) git ls-files *.c *.h | xargs clang-format --dry-run --Werror

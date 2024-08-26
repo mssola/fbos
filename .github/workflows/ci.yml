@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CROSS_COMPILE: riscv64-linux-gnu-
+  CC_SUFFIX: -14
+
+jobs:
+  test:
+    name: Continuous Integration
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies from Ubuntu sources
+        run: sudo apt-get install clang-format gcc-14-riscv64-linux-gnu
+
+      - name: Lint
+        run: make lint V=1
+
+      - name: Check that it builds
+        run: make V=1
