@@ -63,15 +63,17 @@ $ make ARCH=riscv CROSS_COMPILE=<your-cross-compile> PLATFORM=generic
 With that simply set the `QEMU_BIOS` environment variable with the full path of
 the resulting `fw_dynamic.bin` file.
 
-Now make sure that you have the version that is able to emulate a RISC-V system.
-After that, simply run:
+Now make sure that you have a QEMU version that is able to emulate a RISC-V
+system. After that, simply run:
 
 ```
 $ make qemu
 ```
 
-The `qemu` target can be paired with the `DEBUG` parameter that you can pass to
-make. Hence, you can also call it like so:
+This will open up QEMU in `-nographic` mode (hence the serial output will be
+simply redirected to stdout), and you will be able to see the whole thing
+working. Moreover, the `qemu` target can be paired with the `DEBUG` parameter
+that you can pass to make. Hence, you can also call it like so:
 
 ```
 $ make qemu DEBUG=1
@@ -83,19 +85,33 @@ This will make QEMU wait for a GDB connection. On another terminal then type:
 $ make gdb
 ```
 
-Now you have a debugging session for this kernel. If you want to skip ahead,
-notice that the kernel starts at `PAGE_OFFSET` (see `include/fbos/mm.h`). Hence,
-upon starting the GDB session you can simply type:
+Now you have a debugging session for this kernel with debug symbols loaded.
+Hence, upon starting the GDB session you can simply type:
 
 ```
-# 0x80200000 is the current value of PAGE_OFFSET.
-(gdb) break *0x80200000
+(gdb) break _start
 (gdb) continue
 ```
 
 From there you are already out of firmware code and right into the kernel.
+Moreover, you can also pass the `GDB_EXTRA_FLAGS` variable to the `make gdb`
+target. This way you can pass extra parameters to gdb, such as:
+
+```
+$ make gdb GDB_EXTRA_FLAGS="-tui"
+```
+
+And now you have started a GDB session with a nice TUI interface.
 
 ## Special thanks to
 
 SUSE for organizing [Hack Week 24](https://hackweek.opensuse.org/24/projects).
 This project was mainly developed during this time.
+
+I have also taken lots of valuable input by reading [Popovic's
+blog](https://popovicu.com/), so thanks a lot for writing such clear articles on
+a rather obscure topic. In a similar way, I have also taken the time to read a
+lot of code from the Linux Kernel. My understanding of both RISC-V and the Linux
+Kernel itself has vastly improved with this exercise, so I'd also like to take
+the chance to be grateful to the many people who have contributed to this vast
+undertaking that is the Linux Kernel.

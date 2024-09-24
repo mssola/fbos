@@ -1,5 +1,5 @@
 ##
-# By default everything is silent. If you want to change this behavior, simply
+# By default everything is silent. If you want to change this behavior simply
 # assign V=1 when calling make.
 
 V =
@@ -21,14 +21,19 @@ CC    = $(CROSS_COMPILE)gcc$(CC_SUFFIX)
 LD    = $(CROSS_COMPILE)ld
 QEMU ?= qemu-system-riscv64
 
-ISA        ?= rv64imafdc_zicntr_zicsr_zifencei_zihpm_zca_zcd_zba_zbb
-CCFLAGS     = -march=$(ISA) -Iinclude/ -mabi=lp64
-CCFLAGS    += -Werror -Wpedantic -Wall -Wextra -Wcast-align -Wcast-qual -Winit-self \
-              -Wmissing-include-dirs -Wredundant-decls -Wshadow -Wsign-conversion \
-              -Wswitch-default -Wundef -Wunreachable-code -Wmissing-noreturn
-LDFLAGS     = -Iinclude/ -static -nostdlib -melf64lriscv -z noexecstack
-QEMU_FLAGS ?=
-QEMU_BIOS  ?=
+ISA     ?= rv64imafdc_zicntr_zicsr_zifencei_zihpm_zca_zcd_zba_zbb
+CCFLAGS  = -march=$(ISA) -Iinclude/ -mabi=lp64d
+CCFLAGS += -Werror -Wpedantic -Wall -Wextra -Wcast-align -Wcast-qual -Winit-self \
+           -Wmissing-include-dirs -Wredundant-decls -Wshadow -Wsign-conversion \
+           -Wswitch-default -Wundef -Wunreachable-code -Wmissing-noreturn
+LDFLAGS  = -Iinclude/ -static -nostdlib -melf64lriscv -z noexecstack
+
+##
+# Optional parameters for QEMU and gdb.
+
+QEMU_FLAGS      ?=
+QEMU_BIOS       ?=
+GDB_EXTRA_FLAGS ?=
 
 ##
 # You can pass an optional `DEBUG` variable to manipulate the build type. This
@@ -74,7 +79,7 @@ $(KRNL): $(OBJ) $(LINKER).S
 	$(Q) $(CC) $(CCFLAGS) -c $< -o $@
 
 .PHONY: qemu
-qemu:
+qemu: $(KRNL)
 ifeq ($(strip $(QEMU_BIOS)),)
 	$(Q) $(QEMU) $(QEMU_FLAGS) -machine virt -kernel $(KRNL) -nographic
 else
@@ -83,7 +88,7 @@ endif
 
 .PHONY: gdb
 gdb:
-	$(Q) gdb --command utils/init.gdb
+	$(Q) gdb --command utils/init.gdb $(GDB_EXTRA_FLAGS) $(KRNL)
 
 .PHONY: clean
 clean:
