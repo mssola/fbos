@@ -8,8 +8,9 @@ are unaware of each other and it's up to the kernel to schedule them by using
 the timer interrupts as given by openSBI (`fizz` on % 3 seconds, `buzz` on % 5
 seconds, and `fizzbuzz` on % 15 seconds).
 
-This kernel provides just one system call, `write`, which allows any program to
-pass the string to be written into the serial port.
+This kernel provides just one system call, `write_and_block`, which allows any
+program to pass the string to be written into the serial port and wait for the
+kernel to re-schedule it.
 
 ## Build
 
