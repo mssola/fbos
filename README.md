@@ -104,6 +104,19 @@ $ make gdb GDB_EXTRA_FLAGS="-tui"
 
 And now you have started a GDB session with a nice TUI interface.
 
+## Requirements
+
+We do not want to support a myriad of different scenarios, but we want to keep
+things simple. Hence, here there are some limitations/requirements:
+
+- You need a recent enough OpenSBI running on your firmware. I have tested this
+  on a QEMU which has OpenSBI v1.5, but any firmware that implements a Runtime
+  SBI version of 2.0 should be fine.
+- You are supposed to pass an `initrd` always. This kernel will not try to
+  magically come up with a made up file system or try to fetch something from an
+  existing one. An `initrd` is already provided for you on the default `make`
+  target, and that's what you are supposed to be passing to the kernel.
+
 ## Special thanks to
 
 SUSE for organizing [Hack Week 24](https://hackweek.opensuse.org/24/projects).

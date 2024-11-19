@@ -18,16 +18,15 @@ endif
 # no `-mcpu`, no `-mtune`, no funny business.
 
 CC    = $(CROSS_COMPILE)gcc$(CC_SUFFIX)
-AS    = $(CROSS_COMPILE)as$(CC_SUFFIX)
 LD    = $(CROSS_COMPILE)ld
 QEMU ?= qemu-system-riscv64
 
 ISA     ?= rv64imafdc_zicntr_zicsr_zifencei_zihpm_zca_zcd_zba_zbb
-ASFLAGS  = -march=$(ISA) -mabi=lp64d
+ASFLAGS  = -march=$(ISA) -mabi=lp64d -mcmodel=medany
 CCFLAGS  = $(ASFLAGS) -Iinclude/
 CCFLAGS += -Werror -Wpedantic -Wall -Wextra -Wcast-align -Wcast-qual -Winit-self \
            -Wmissing-include-dirs -Wredundant-decls -Wshadow -Wsign-conversion \
-           -Wswitch-default -Wundef -Wunreachable-code -Wmissing-noreturn \
+           -Wswitch-default -Wundef -Wunreachable-code \
            -nostdinc -nostdlib -std=gnu17
 LDFLAGS  = -Iinclude/ -static -melf64lriscv -z noexecstack
 USRFLAGS = -static -melf64lriscv
@@ -48,6 +47,7 @@ ifeq ($(strip $(DEBUG)),)
 	CCFLAGS += -O3
 	QEMU_FLAGS += -nographic
 else
+	ASFLAGS += -g
 	CCFLAGS += -g
 	QEMU_FLAGS += -s -S
 endif
@@ -55,7 +55,7 @@ endif
 ##
 # Paths
 
-SRC    = $(wildcard kernel/head.S kernel/*.c)
+SRC    = $(filter-out kernel/fbos.ld.S, $(wildcard kernel/*.S kernel/*.c))
 OBJ    = $(patsubst %.c,%.o,$(patsubst %.S,%.o,$(SRC)))
 LINKER = kernel/fbos.ld
 KRNL   = fbos
@@ -83,7 +83,7 @@ $(KRNL): $(OBJ) $(LINKER).S
 
 .S.o:
 	$(E) "	CC	" $(*F)
-	$(Q) $(CC) $(CCFLAGS) -c $< -o $@
+	$(Q) $(CC) $(CCFLAGS) -D__ASSEMBLY__ -c $< -o $@
 
 ##
 # User space
@@ -94,8 +94,8 @@ usr: $(USR)
 	$(Q) find usr/bin/ -type f -executable | cpio -o --quiet -H newc > $(INIT)
 
 usr/src/%.o: usr/src/%.S
-	$(E) "	AS	" $(basename $@)
-	$(Q) $(AS) $(ASFLAGS) -c $< -o $@
+	$(E) "	CC	" $(basename $@)
+	$(Q) $(CC) $(ASFLAGS) -D__ASSEMBLY__ -c $< -o $@
 
 usr/bin/%: usr/src/%.o
 	$(Q) mkdir -p usr/bin/
