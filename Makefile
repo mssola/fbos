@@ -98,6 +98,7 @@ usr/src/%.o: usr/src/%.S
 	$(Q) $(AS) $(ASFLAGS) -c $< -o $@
 
 usr/bin/%: usr/src/%.o
+	$(Q) mkdir -p usr/bin/
 	$(E) "	LD	" $@
 	$(Q) $(LD) $(USRFLAGS) $< -o $@
 
