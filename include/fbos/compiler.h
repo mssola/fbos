@@ -24,6 +24,13 @@ typedef unsigned long size_t;
 typedef unsigned long uint64_t;
 typedef unsigned long uintptr_t;
 
+/*
+ * NULL
+ */
+
+#define NULL (void *)0
+#define nullptr NULL
+
 // Helpful macro when prototyping.
 #define __unused(x) (void)x
 

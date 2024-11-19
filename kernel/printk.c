@@ -19,5 +19,8 @@ void __kernel printk(const char *const message)
 		return;
 	}
 
-	sbi_ecall2(DBCN_EXT, DBCN_WRITE, len, (unsigned long)message);
+	struct sbi_ret ret = sbi_ecall2(DBCN_EXT, DBCN_WRITE, len, (unsigned long)message);
+	if (ret.error != SBI_SUCCESS) {
+		die(nullptr);
+	}
 }
