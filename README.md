@@ -116,6 +116,8 @@ things simple. Hence, here there are some limitations/requirements:
   magically come up with a made up file system or try to fetch something from an
   existing one. An `initrd` is already provided for you on the default `make`
   target, and that's what you are supposed to be passing to the kernel.
+- RISC-V is ambivalent on the endianness. Not this kernel. Out of simplicity we
+  require a little-endian RISC-V system.
 
 ## Special thanks to
 
