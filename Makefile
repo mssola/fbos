@@ -81,11 +81,11 @@ $(KRNL): $(OBJ) $(LINKER).S
 
 .c.o:
 	$(E) "	CC	" $(basename $@)
-	$(Q) $(CC) $(CCFLAGS) $(KRNLFLAGS) -c $< -o $@
+	$(Q) $(CC) $(CCFLAGS) -c $< -o $@
 
 .S.o:
 	$(E) "	CC	" $(basename $@)
-	$(Q) $(CC) $(CCFLAGS) -D__ASSEMBLY__ -D__KERNEL__ -c $< -o $@
+	$(Q) $(CC) $(CCFLAGS) -D__ASSEMBLY__ -c $< -o $@
 
 ##
 # User space
@@ -97,7 +97,7 @@ usr: $(USR)
 
 usr/src/%.o: usr/src/%.S
 	$(E) "	CC	" $(basename $@)
-	$(Q) $(CC) $(ASFLAGS) -D__ASSEMBLY__ -D__KERNEL__ -c $< -o $@
+	$(Q) $(CC) $(ASFLAGS) -D__ASSEMBLY__ -c $< -o $@
 
 usr/bin/%: usr/src/%.o
 	$(Q) mkdir -p usr/bin/
@@ -129,7 +129,7 @@ test/%: test/%.o
 # Hacking
 
 .PHONY: qemu
-qemu: $(KRNL) usr
+qemu: clean $(KRNL) usr
 ifeq ($(strip $(QEMU_BIOS)),)
 	$(Q) $(QEMU) $(QEMU_FLAGS) -machine virt -kernel $(KRNL) -initrd $(INIT)
 else
