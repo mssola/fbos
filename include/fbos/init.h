@@ -6,6 +6,6 @@
 extern struct task_struct init_task;
 
 // The entry point for the kernel.
-__noreturn __kernel void start_kernel(uintptr_t *dtb);
+__noreturn __kernel void start_kernel(void *dtb);
 
 #endif /* __FBOS_INIT_H */

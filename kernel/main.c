@@ -13,13 +13,14 @@ struct task_struct init_task = { .stack = init_stack };
  * function can (and will) assume that everything has been reset and that we can
  * start the whole thing.
  */
-__noreturn __kernel void start_kernel(uintptr_t *dtb)
+__noreturn __kernel void start_kernel(void *dtb)
 {
 	// TODO: disable irqs, etc.
 
 	printk("Welcome to FizzBuzz OS!\n");
 
-	parse_dtb(dtb);
+	struct initrd_addr addr = find_dt_initrd_addr(dtb);
+	__unused(addr); // TODO
 
 	// TODO: reenable stuff
 

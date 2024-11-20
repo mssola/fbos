@@ -17,19 +17,20 @@ endif
 # I did not go too much into the rabbit hole of platform-specific flags. Hence
 # no `-mcpu`, no `-mtune`, no funny business.
 
-CC    = $(CROSS_COMPILE)gcc$(CC_SUFFIX)
-LD    = $(CROSS_COMPILE)ld
+CC     = $(CROSS_COMPILE)gcc$(CC_SUFFIX)
+LD     = $(CROSS_COMPILE)ld
+HOSTCC = gcc
 QEMU ?= qemu-system-riscv64
 
-ISA     ?= rv64imafdc_zicntr_zicsr_zifencei_zihpm_zca_zcd_zba_zbb
-ASFLAGS  = -march=$(ISA) -mabi=lp64d -mcmodel=medany
-CCFLAGS  = $(ASFLAGS) -Iinclude/
-CCFLAGS += -Werror -Wpedantic -Wall -Wextra -Wcast-align -Wcast-qual -Winit-self \
-           -Wmissing-include-dirs -Wredundant-decls -Wshadow -Wsign-conversion \
-           -Wswitch-default -Wundef -Wunreachable-code \
-           -nostdinc -nostdlib -std=gnu17
-LDFLAGS  = -Iinclude/ -static -melf64lriscv -z noexecstack
-USRFLAGS = -static -melf64lriscv
+ISA      ?= rv64imafdc_zicntr_zicsr_zifencei_zihpm_zca_zcd_zba_zbb
+ASFLAGS   = -march=$(ISA) -mabi=lp64d -mcmodel=medany
+CCFLAGS   = $(ASFLAGS) -Iinclude/ -D__KERNEL__ -std=gnu17 -nostdinc -nostdlib
+WARNINGS  = -Werror -Wpedantic -Wall -Wextra -Wcast-align -Wcast-qual -Winit-self \
+            -Wmissing-include-dirs -Wredundant-decls -Wshadow -Wsign-conversion \
+            -Wswitch-default -Wundef -Wunreachable-code
+CCFLAGS  += $(WARNINGS)
+LDFLAGS   = -Iinclude/ -static -melf64lriscv -z noexecstack
+USRFLAGS  = -static -melf64lriscv
 
 ##
 # Optional parameters for QEMU and gdb.
@@ -55,12 +56,13 @@ endif
 ##
 # Paths
 
-SRC    = $(filter-out kernel/fbos.ld.S, $(wildcard kernel/*.S kernel/*.c))
+SRC    = $(filter-out kernel/fbos.ld.S, $(wildcard kernel/*.S kernel/*.c lib/*.c))
 OBJ    = $(patsubst %.c,%.o,$(patsubst %.S,%.o,$(SRC)))
 LINKER = kernel/fbos.ld
 KRNL   = fbos
 USR    = usr/bin/foo
 INIT   = usr/initramfs.cpio
+TESTS  = test/test_dt
 
 LDFLAGS += -T $(LINKER)
 
@@ -68,7 +70,7 @@ LDFLAGS += -T $(LINKER)
 # Kernel
 
 .PHONY: all
-all: clean $(KRNL) usr
+all: clean $(KRNL) usr test
 
 .PHONY: $(KRNL)
 $(KRNL): $(OBJ) $(LINKER).S
@@ -78,12 +80,12 @@ $(KRNL): $(OBJ) $(LINKER).S
 	$(Q) $(LD) $(LDFLAGS) $(OBJ) -o $(KRNL)
 
 .c.o:
-	$(E) "	CC	" $(*F)
-	$(Q) $(CC) $(CCFLAGS) -c $< -o $@
+	$(E) "	CC	" $(basename $@)
+	$(Q) $(CC) $(CCFLAGS) $(KRNLFLAGS) -c $< -o $@
 
 .S.o:
-	$(E) "	CC	" $(*F)
-	$(Q) $(CC) $(CCFLAGS) -D__ASSEMBLY__ -c $< -o $@
+	$(E) "	CC	" $(basename $@)
+	$(Q) $(CC) $(CCFLAGS) -D__ASSEMBLY__ -D__KERNEL__ -c $< -o $@
 
 ##
 # User space
@@ -95,7 +97,7 @@ usr: $(USR)
 
 usr/src/%.o: usr/src/%.S
 	$(E) "	CC	" $(basename $@)
-	$(Q) $(CC) $(ASFLAGS) -D__ASSEMBLY__ -c $< -o $@
+	$(Q) $(CC) $(ASFLAGS) -D__ASSEMBLY__ -D__KERNEL__ -c $< -o $@
 
 usr/bin/%: usr/src/%.o
 	$(Q) mkdir -p usr/bin/
@@ -104,6 +106,24 @@ usr/bin/%: usr/src/%.o
 
 # HACK: do not remove object files from usr/src/.
 .SECONDARY:
+
+##
+# Tests
+
+.PHONY: test
+test: host_lib $(TESTS)
+	$(Q) ./test/test_dt
+
+host_lib:
+	$(Q) $(HOSTCC) $(WARNINGS) -Iinclude/ -g -c lib/dt.c -o lib/dt.o
+
+test/%.o: test/%.c
+	$(E) "	HOSTCC	" $(basename $@)
+	$(Q) $(HOSTCC) $(WARNINGS) -g -Iinclude/ -c $< -o $@
+
+test/%: test/%.o
+	$(E) "	HOSTLD	" $@
+	$(Q) $(HOSTCC) -Iinclude/ $< lib/dt.o -o $@
 
 ##
 # Hacking
@@ -122,7 +142,7 @@ gdb:
 
 .PHONY: clean
 clean:
-	$(Q) rm -f $(OBJ) $(KRNL) $(LINKER) $(USR) usr/src/*.o $(INIT)
+	$(Q) rm -f $(OBJ) $(KRNL) $(LINKER) $(USR) usr/src/*.o $(INIT) test/*.o $(TESTS)
 
 .PHONY: lint
 lint:
