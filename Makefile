@@ -19,11 +19,11 @@ endif
 
 CC     = $(CROSS_COMPILE)gcc$(CC_SUFFIX)
 LD     = $(CROSS_COMPILE)ld
-HOSTCC = gcc
+HOSTCC = gcc$(CC_SUFFIX)
 QEMU ?= qemu-system-riscv64
 
 ISA      ?= rv64imafdc_zicntr_zicsr_zifencei_zihpm_zca_zcd_zba_zbb
-ASFLAGS   = -march=$(ISA) -mabi=lp64d -mcmodel=medany
+ASFLAGS   = -march=$(ISA) -mabi=lp64d -mcmodel=medany -fno-PIE
 CCFLAGS   = $(ASFLAGS) -Iinclude/ -D__KERNEL__ -std=gnu17 -nostdinc -nostdlib
 WARNINGS  = -Werror -Wpedantic -Wall -Wextra -Wcast-align -Wcast-qual -Winit-self \
             -Wmissing-include-dirs -Wredundant-decls -Wshadow -Wsign-conversion \
