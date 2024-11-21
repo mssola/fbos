@@ -8,6 +8,7 @@ usr/initramfs.cpio
 
 test/*.o
 test/test_dt
+test/test_initrd
 
 # You can generate it with Bear: `$ bear -- make`.
 compile_commands.json

@@ -35,10 +35,36 @@ strcmp:
 1:
 	lbu t0, 0(a0)
 	lbu t1, 0(a1)
+	addi a0, a0, 1
+	addi a1, a1, 1
+	bne t0, t1, 2f
+	bnez t0, 1b
+	li a0, 0
+	ret
+2:
+	sub a0, t0, t1
+	ret
+
+/*
+ * Defined in include/fbos/string.h
+ *
+ *     int memcmp(const void *ptr1, const void *ptr2, size_t n)
+ *
+ * Returns (a0): comparison result as in stdlib.
+ * Parameter (a0, a1): strings to compare.
+ * Clobbers: t0, t1.
+ */
+.global memcmp
+.type memcmp, @function
+memcmp:
+1:
+	lbu t0, 0(a0)
+	lbu t1, 0(a1)
 	bne t0, t1, 2f
 	addi a0, a0, 1
 	addi a1, a1, 1
-	bnez t0, 1b
+	addi a2, a2, -1
+	bnez a2, 1b
 	li a0, 0
 	ret
 2:

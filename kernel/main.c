@@ -20,7 +20,8 @@ __noreturn __kernel void start_kernel(void *dtb)
 	printk("Welcome to FizzBuzz OS!\n");
 
 	struct initrd_addr addr = find_dt_initrd_addr(dtb);
-	__unused(addr); // TODO
+
+	extract_initrd((char *)addr.start, addr.end - addr.start);
 
 	// TODO: reenable stuff
 

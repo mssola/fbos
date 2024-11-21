@@ -60,9 +60,9 @@ SRC    = $(filter-out kernel/fbos.ld.S, $(wildcard kernel/*.S kernel/*.c lib/*.c
 OBJ    = $(patsubst %.c,%.o,$(patsubst %.S,%.o,$(SRC)))
 LINKER = kernel/fbos.ld
 KRNL   = fbos
-USR    = usr/bin/foo
+USR    = usr/bin/foo usr/bin/bar usr/bin/foobar
 INIT   = usr/initramfs.cpio
-TESTS  = test/test_dt
+TESTS  = test/test_dt test/test_initrd
 
 LDFLAGS += -T $(LINKER)
 
@@ -111,19 +111,21 @@ usr/bin/%: usr/src/%.o
 # Tests
 
 .PHONY: test
-test: host_lib $(TESTS)
+test: host_lib usr $(TESTS)
 	$(Q) ./test/test_dt
+	$(Q) ./test/test_initrd
 
 host_lib:
-	$(Q) $(HOSTCC) $(WARNINGS) -Iinclude/ -g -c lib/dt.c -o lib/dt.o
+	$(Q) mkdir -p test/lib
+	$(Q) $(HOSTCC) $(WARNINGS) -Iinclude/ -g -c lib/dt.c -o test/lib/dt.o
+	$(Q) $(HOSTCC) $(WARNINGS) -Iinclude/ -g -c kernel/initrd.c -o test/lib/initrd.o
 
 test/%.o: test/%.c
-	$(E) "	HOSTCC	" $(basename $@)
 	$(Q) $(HOSTCC) $(WARNINGS) -g -Iinclude/ -c $< -o $@
 
 test/%: test/%.o
-	$(E) "	HOSTLD	" $@
-	$(Q) $(HOSTCC) -Iinclude/ $< lib/dt.o -o $@
+	$(E) "	TEST	" $@
+	$(Q) $(HOSTCC) -Iinclude/ $< test/lib/*.o -o $@
 
 ##
 # Hacking
@@ -142,7 +144,7 @@ gdb:
 
 .PHONY: clean
 clean:
-	$(Q) rm -f $(OBJ) $(KRNL) $(LINKER) $(USR) usr/src/*.o $(INIT) test/*.o $(TESTS)
+	$(Q) rm -f $(OBJ) $(KRNL) $(LINKER) $(USR) usr/src/*.o $(INIT) test/*.o test/lib/*.o $(TESTS)
 
 .PHONY: lint
 lint:
