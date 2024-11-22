@@ -1,6 +1,7 @@
 #include <fbos/init.h>
 #include <fbos/sbi.h>
 #include <fbos/printk.h>
+#include <fbos/sched.h>
 
 // TODO: this is QEMU-specific. To obtain this:
 //   - Parse the DTB and look for the 'cpus.timebase-frequency' property.
@@ -14,6 +15,13 @@
 
 // Mask for 'scause' to figure out if the interrupt was caused by the timer.
 #define TIMER_SCAUSE_MASK 0x05
+
+// Mask for 'scause' to figure out if the exception was cause by U privilege
+// mode making an 'ecall'.
+#define USER_ECALL_MASK 0x08
+
+// Identifier for the 'write' system call.
+#define NR_WRITE 0x01
 
 // Declared in include/fbos/init.h.
 uint64_t seconds_elapsed;
@@ -38,6 +46,27 @@ __kernel void time_out_in_one_second(void)
 	}
 }
 
+__kernel __always_inline void exception_handler(uint64_t cause)
+{
+	register char *message asm("a0");
+	register size_t n asm("a1");
+	register uint64_t syscall_id asm("a7");
+
+	if ((cause & USER_ECALL_MASK) != USER_ECALL_MASK) {
+		die("Don't know how to handle this exception :D\n");
+	}
+	if (syscall_id != NR_WRITE) {
+		die("Bad syscall\n");
+	}
+
+	// TODO: acknowledge 'sip' bit?
+	next_task = TASK_UNKNOWN;
+	write(message, n);
+
+	// TODO: is it safe to jump to idle here? Any preparation to be done?
+	idle();
+}
+
 /*
  * Direct interrupt handler. Handles interrupts such as the timer event and user
  * mode entries.
@@ -57,13 +86,11 @@ __aligned(4) __s_interrupt __kernel void interrupt_handler(void)
 	asm volatile("csrr %0, scause" : "=r"(cause)::);
 
 	if (IS_EXCEPTION(cause)) {
-		die("Don't know how to handle exceptions :D\n");
+		exception_handler(cause);
 	}
 
 	if ((cause & TIMER_SCAUSE_MASK) == TIMER_SCAUSE_MASK) {
-		// Clear timer interrupt pending bit from the 'sip' register. Also clear
-		// the timer interrupt enable so it's re-enabled after running the
-		// fizz/buzz logic.
+		// Clear timer interrupt pending bit from the 'sip' register.
 		asm volatile("li t0, 32\n\t"
 					 "csrc sip, t0\n\t"
 					 "csrc sie, t0"
@@ -74,11 +101,13 @@ __aligned(4) __s_interrupt __kernel void interrupt_handler(void)
 		// BEHOLD! The fizz buzz logic! :D
 		seconds_elapsed += 1;
 		if ((seconds_elapsed % 15) == 0) {
-			printk("Should run fizzbuzz\n");
+			next_task = TASK_FIZZBUZZ;
 		} else if ((seconds_elapsed % 5) == 0) {
-			printk("Should run buzz\n");
+			next_task = TASK_BUZZ;
 		} else if ((seconds_elapsed % 3) == 0) {
-			printk("Should run fizz\n");
+			next_task = TASK_FIZZ;
+		} else {
+			next_task = TASK_UNKNOWN;
 		}
 
 		// Re-enable timer interrupts.

@@ -6,6 +6,9 @@
  */
 
 #define __noreturn __attribute__((__noreturn__))
+#ifndef __always_inline
+#define __always_inline __attribute__((__always_inline__)) inline
+#endif
 #define __s_interrupt __attribute__((interrupt("supervisor")))
 #define __aligned(x) __attribute__((aligned(x)))
 
