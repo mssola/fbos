@@ -6,6 +6,8 @@
  */
 
 #define __noreturn __attribute__((__noreturn__))
+#define __s_interrupt __attribute__((interrupt("supervisor")))
+#define __aligned(x) __attribute__((aligned(x)))
 
 /*
  * Compiler attributes specific to linker sections.

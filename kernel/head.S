@@ -53,3 +53,7 @@ _start:
 
 	// Start the kernel.
 	tail start_kernel
+
+	// We really shouldn't reach this point, but just in case, just loop
+	// infinitely here.
+	j .

@@ -18,11 +18,17 @@ enum sbi_ret_error {
 // SBI extensions supported by this kernel.
 enum sbi_ext {
 	DBCN_EXT = 0x4442434E,
+	TIME_EXT = 0x54494D45,
 };
 
 // Function IDs for the Debug Console Extension "DBCN".
 enum dbcn_actions {
 	DBCN_WRITE = 0x00,
+};
+
+// Function IDs for the Timer Extension "TIME".
+enum time_actions {
+	TIME_SET_TIMER = 0x00,
 };
 
 // Return value for any SBI ecall.
@@ -37,6 +43,7 @@ extern struct sbi_ret __sbi_ecall(unsigned long arg0, unsigned long arg1, unsign
 								  unsigned long arg3, unsigned long arg4, unsigned long arg5,
 								  int fid, int ext);
 
+#define sbi_ecall1(ext, fid, arg0) __sbi_ecall(arg0, 0, 0, 0, 0, 0, fid, ext)
 #define sbi_ecall2(ext, fid, arg0, arg1) __sbi_ecall(arg0, arg1, 0, 0, 0, 0, fid, ext)
 
 #endif // __FBOS_SBI_H_

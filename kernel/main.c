@@ -20,19 +20,17 @@ struct task_struct tasks[4] = {
  */
 __noreturn __kernel void start_kernel(void *dtb)
 {
-	// TODO: disable irqs, etc.
-
 	printk("Welcome to FizzBuzz OS!\n");
 
+	// Extract information from the DTB blob.
 	struct initrd_addr addr = find_dt_initrd_addr(dtb);
-
 	extract_initrd((unsigned char *)addr.start, addr.end - addr.start);
 
-	// TODO: this is the jump address for the first task.
-	const char *ddr = (const char *)tasks[1].addr + tasks[1].entry_offset;
-	__unused(ddr);
-
-	// TODO: reenable stuff
+	// At this point everything has already been handled: setup the interrupt
+	// vector and enable the timer to start ticking and scheduling the three
+	// tasks at hand.
+	seconds_elapsed = 0;
+	setup_interrupts();
 
 	for (;;)
 		;
