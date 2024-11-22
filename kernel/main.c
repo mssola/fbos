@@ -32,6 +32,9 @@ __noreturn __kernel void start_kernel(void *dtb)
 	seconds_elapsed = 0;
 	setup_interrupts();
 
-	for (;;)
-		;
+	for (;;) {
+		// Put the machine on low power consumption since we are not doing
+		// anything fancy here.
+		asm volatile("wfi");
+	}
 }
