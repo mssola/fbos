@@ -3,11 +3,11 @@
 
 _start:
 	li a7, 1
-	la a0, foobar
+	la a0, fizz
 	ecall
 .Loop:
 	j .Loop
 
 .section .rodata
-foobar:
-	.string "foobar\n"
+fizz:
+	.string "fizz\n"

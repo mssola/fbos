@@ -60,7 +60,7 @@ SRC    = $(filter-out kernel/fbos.ld.S, $(wildcard kernel/*.S kernel/*.c lib/*.c
 OBJ    = $(patsubst %.c,%.o,$(patsubst %.S,%.o,$(SRC)))
 LINKER = kernel/fbos.ld
 KRNL   = fbos
-USR    = usr/bin/foo usr/bin/bar usr/bin/foobar
+USR    = usr/bin/fizz usr/bin/buzz usr/bin/fizzbuzz
 INIT   = usr/initramfs.cpio
 TESTS  = test/test_dt test/test_initrd
 
