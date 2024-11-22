@@ -7,10 +7,10 @@
 unsigned long init_stack[4][THREAD_SIZE / sizeof(unsigned long)];
 
 struct task_struct tasks[4] = {
-	[0] = { .stack = init_stack[0] },
-	[1] = { .stack = init_stack[1] },
-	[2] = { .stack = init_stack[2] },
-	[3] = { .stack = init_stack[3] },
+	[TASK_INIT] = { .stack = init_stack[0], .addr = nullptr, .entry_offset = 0, },
+	[TASK_FIZZ] = { .stack = init_stack[1], .addr = nullptr, .entry_offset = 0, },
+	[TASK_BUZZ] = { .stack = init_stack[2], .addr = nullptr, .entry_offset = 0, },
+	[TASK_FIZZBUZZ] = { .stack = init_stack[3], .addr = nullptr, .entry_offset = 0, },
 };
 
 /*

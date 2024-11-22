@@ -6,9 +6,9 @@
 enum task_id {
 	TASK_UNKNOWN = -1,
 	TASK_INIT = 0,
-	TASK_FOO = 1,
-	TASK_BAR = 2,
-	TASK_FOOBAR = 3,
+	TASK_FIZZ = 1,
+	TASK_BUZZ = 2,
+	TASK_FIZZBUZZ = 3,
 };
 
 struct task_struct {

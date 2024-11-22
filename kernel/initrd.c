@@ -3,7 +3,7 @@
 #include <fbos/printk.h>
 #include <fbos/string.h>
 
-#define BUFFER_SIZE 16
+#define BUFFER_SIZE 32
 
 #define CPIO_HEADER_FILESIZE 54
 #define CPIO_HEADER_NAMESIZE 94
@@ -53,12 +53,12 @@ __kernel uint64_t strtoul16(const char *str, size_t count)
 
 __kernel int get_task_id_from_name(const char *const name)
 {
-	if (strcmp(name, "usr/bin/foo") == 0) {
-		return TASK_FOO;
-	} else if (strcmp(name, "usr/bin/bar") == 0) {
-		return TASK_BAR;
-	} else if (strcmp(name, "usr/bin/foobar") == 0) {
-		return TASK_FOOBAR;
+	if (strcmp(name, "usr/bin/fizz") == 0) {
+		return TASK_FIZZ;
+	} else if (strcmp(name, "usr/bin/buzz") == 0) {
+		return TASK_BUZZ;
+	} else if (strcmp(name, "usr/bin/fizzbuzz") == 0) {
+		return TASK_FIZZBUZZ;
 	}
 	return TASK_UNKNOWN;
 }
