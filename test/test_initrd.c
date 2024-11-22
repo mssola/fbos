@@ -3,6 +3,17 @@
 #include <assert.h>
 
 #include <fbos/init.h>
+#include <fbos/sched.h>
+#include <fbos/mm.h>
+
+unsigned long init_stack[4][THREAD_SIZE / sizeof(unsigned long)];
+
+struct task_struct tasks[4] = {
+	[0] = { .stack = init_stack[0] },
+	[1] = { .stack = init_stack[1] },
+	[2] = { .stack = init_stack[2] },
+	[3] = { .stack = init_stack[3] },
+};
 
 int main(void)
 {
@@ -13,7 +24,7 @@ int main(void)
 	long fsize = ftell(fh);
 	rewind(fh);
 
-	char *contents = malloc((unsigned long)fsize + 1);
+	unsigned char *contents = malloc((unsigned long)fsize + 1);
 	fread(contents, (unsigned long)fsize, 1, fh);
 	fclose(fh);
 

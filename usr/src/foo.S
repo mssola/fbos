@@ -2,8 +2,8 @@
 .text
 
 _start:
-	li a0, 1
-	la a1, foo
+	li a7, 1
+	la a0, foo
 	ecall
 .Loop:
 	j .Loop

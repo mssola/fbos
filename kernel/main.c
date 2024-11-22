@@ -4,9 +4,14 @@
 #include <fbos/sched.h>
 #include <fbos/dt.h>
 
-unsigned long init_stack[THREAD_SIZE / sizeof(unsigned long)];
+unsigned long init_stack[4][THREAD_SIZE / sizeof(unsigned long)];
 
-struct task_struct init_task = { .stack = init_stack };
+struct task_struct tasks[4] = {
+	[0] = { .stack = init_stack[0] },
+	[1] = { .stack = init_stack[1] },
+	[2] = { .stack = init_stack[2] },
+	[3] = { .stack = init_stack[3] },
+};
 
 /*
  * This is the main entry point of the kernel after head.S is done. This
@@ -21,7 +26,11 @@ __noreturn __kernel void start_kernel(void *dtb)
 
 	struct initrd_addr addr = find_dt_initrd_addr(dtb);
 
-	extract_initrd((char *)addr.start, addr.end - addr.start);
+	extract_initrd((unsigned char *)addr.start, addr.end - addr.start);
+
+	// TODO: this is the jump address for the first task.
+	const char *ddr = (const char *)tasks[1].addr + tasks[1].entry_offset;
+	__unused(ddr);
 
 	// TODO: reenable stuff
 

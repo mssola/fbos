@@ -43,8 +43,8 @@ _start:
 	csrw sscratch, 0
 
 	// Point tp and sp to the init task.
-	la tp, init_task
-	la sp, init_task + THREAD_SIZE
+	la tp, tasks
+	la sp, tasks + THREAD_SIZE
 
 	// The `start_kernel` function requires an argument to be passed, which is
 	// the pointer to the `fdt` blob. The bootloader puts this on the `a1`

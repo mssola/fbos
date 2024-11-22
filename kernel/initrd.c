@@ -63,16 +63,48 @@ __kernel int get_task_id_from_name(const char *const name)
 	return TASK_UNKNOWN;
 }
 
-__kernel void extract_elf(int task_id, const char *const addr, size_t size)
+__kernel void ensure_elf_format(const unsigned char *const addr)
 {
-	__unused(task_id);
-	__unused(addr);
-	__unused(size);
-
-	// TODO
+	if (addr[0] != 0x7F || memcmp(&addr[1], "ELF", 3) != 0) {
+		die("Bad ELF format\n");
+	}
+	if (addr[4] != 2) {
+		die("64-bit format is mandatory\n");
+	}
+	if (addr[5] != 1) {
+		die("Little-endian only\n");
+	}
 }
 
-__kernel void extract_initrd(const char *const initrd_addr, uint64_t size)
+struct exec_header {
+	uint64_t e_entry;
+	uint64_t e_phoff;
+	uint16_t e_phnum;
+	uint16_t e_phentsize;
+};
+
+// TODO
+__kernel void extract_elf(int task_id, const unsigned char *const addr, size_t size)
+{
+	__unused(task_id);
+	__unused(size);
+
+	ensure_elf_format(addr);
+
+	/* struct exec_header header = { */
+	/* 	.e_entry = (unsigned long long)addr[0x18], */
+	/* 	.e_phoff = (uint64_t)addr[0x20], */
+	/* 	.e_phentsize = (uint16_t)addr[0x36], */
+	/* 	.e_phnum = (uint16_t)addr[0x38], */
+	/* }; */
+
+#ifdef __KERNEL__
+	tasks[task_id].addr = (const void *)addr;
+	tasks[task_id].entry_offset = (uint64_t)addr[0x18];
+#endif
+}
+
+__kernel void extract_initrd(const unsigned char *const initrd_addr, uint64_t size)
 {
 	char buffer[BUFFER_SIZE];
 	uint64_t name_size, file_size, padding, base = 0;
