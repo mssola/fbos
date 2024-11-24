@@ -51,22 +51,28 @@ __kernel uint64_t strtoul16(const char *str, size_t count)
 	return ret;
 }
 
-__kernel int get_task_id_from_name(const char *const name)
+// Returns the 'enum taks_id' that can be gathered by the given path.
+__kernel int get_task_id_from_path(const char *const path)
 {
-	if (strcmp(name, "usr/bin/init") == 0) {
+	if (strcmp(path, "usr/bin/init") == 0) {
 		return TASK_INIT;
-	} else if (strcmp(name, "usr/bin/fizz") == 0) {
+	} else if (strcmp(path, "usr/bin/fizz") == 0) {
 		return TASK_FIZZ;
-	} else if (strcmp(name, "usr/bin/buzz") == 0) {
+	} else if (strcmp(path, "usr/bin/buzz") == 0) {
 		return TASK_BUZZ;
-	} else if (strcmp(name, "usr/bin/fizzbuzz") == 0) {
+	} else if (strcmp(path, "usr/bin/fizzbuzz") == 0) {
 		return TASK_FIZZBUZZ;
 	}
 	return TASK_UNKNOWN;
 }
 
-__kernel void ensure_elf_format(const unsigned char *const addr)
+// Fetch the 'entry_addr' for the ELF binary pointed by 'addr'. If everything
+// goes right, the task identified by 'task_id' will finally be initialized with
+// said address.
+__kernel void get_task_entry_addr(int task_id, const unsigned char *const addr)
 {
+	uint64_t offset;
+
 	if (addr[0] != 0x7F || memcmp(&addr[1], "ELF", 3) != 0) {
 		die("Bad ELF format\n");
 	}
@@ -76,35 +82,9 @@ __kernel void ensure_elf_format(const unsigned char *const addr)
 	if (addr[5] != 1) {
 		die("Little-endian only\n");
 	}
-}
 
-struct exec_header {
-	uint64_t e_entry;
-	uint64_t e_phoff;
-	uint16_t e_phnum;
-	uint16_t e_phentsize;
-};
-
-// TODO
-__kernel void extract_elf(int task_id, const unsigned char *const addr, size_t size)
-{
-	__unused(task_id);
-	__unused(size);
-
-	ensure_elf_format(addr);
-
-	/* struct exec_header header = { */
-	/* 	.e_entry = (unsigned long long)addr[0x18], */
-	/* 	.e_phoff = (uint64_t)addr[0x20], */
-	/* 	.e_phentsize = (uint16_t)addr[0x36], */
-	/* 	.e_phnum = (uint16_t)addr[0x38], */
-	/* }; */
-
-#ifdef __KERNEL__
-	uint64_t offset = (uint64_t)addr[0x18];
-
+	offset = (uint64_t)addr[0x18];
 	tasks[task_id].entry_addr = (const void *)(addr + offset);
-#endif
 }
 
 __kernel void extract_initrd(const unsigned char *const initrd_addr, uint64_t size)
@@ -141,7 +121,7 @@ __kernel void extract_initrd(const unsigned char *const initrd_addr, uint64_t si
 		// to identify the task at hand.
 		memcpy(buffer, &initrd_addr[base + CPIO_HEADER_SIZE], name_size);
 		buffer[name_size] = '\0';
-		task_id = get_task_id_from_name(buffer);
+		task_id = get_task_id_from_path(buffer);
 
 		// Note that this is not necessarily a bad CPIO archive, it might just
 		// be the end "TRAILER!!!" delimiter. Either way, just quit at this
@@ -161,8 +141,7 @@ __kernel void extract_initrd(const unsigned char *const initrd_addr, uint64_t si
 		padding = 4 - ((CPIO_HEADER_SIZE + name_size) & 3);
 
 		// And extract everything from the ELF file for the given task.
-		extract_elf(task_id, &initrd_addr[base + name_size + CPIO_HEADER_SIZE + padding],
-					file_size);
+		get_task_entry_addr(task_id, &initrd_addr[base + name_size + CPIO_HEADER_SIZE + padding]);
 
 		// Advance the base to the next file.
 		base += CPIO_HEADER_SIZE + name_size + padding + file_size;
