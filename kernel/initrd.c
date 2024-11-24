@@ -69,7 +69,7 @@ __kernel int get_task_id_from_path(const char *const path)
 // Fetch the 'entry_addr' for the ELF binary pointed by 'addr'. If everything
 // goes right, the task identified by 'task_id' will finally be initialized with
 // said address.
-__kernel void get_task_entry_addr(int task_id, const unsigned char *const addr)
+__kernel const void *get_task_entry_addr(const unsigned char *const addr)
 {
 	uint64_t offset;
 
@@ -84,10 +84,11 @@ __kernel void get_task_entry_addr(int task_id, const unsigned char *const addr)
 	}
 
 	offset = (uint64_t)addr[0x18];
-	tasks[task_id].entry_addr = (const void *)(addr + offset);
+	return (const void *)(addr + offset);
 }
 
-__kernel void extract_initrd(const unsigned char *const initrd_addr, uint64_t size)
+__kernel void extract_initrd(const unsigned char *const initrd_addr, uint64_t size,
+							 struct task_struct g_tasks[4])
 {
 	char buffer[BUFFER_SIZE];
 	uint64_t name_size, file_size, padding, base = 0;
@@ -140,8 +141,10 @@ __kernel void extract_initrd(const unsigned char *const initrd_addr, uint64_t si
 		// there might be some padding in between the header and the file.
 		padding = 4 - ((CPIO_HEADER_SIZE + name_size) & 3);
 
-		// And extract everything from the ELF file for the given task.
-		get_task_entry_addr(task_id, &initrd_addr[base + name_size + CPIO_HEADER_SIZE + padding]);
+		// And extract the entry address for the current task from the ELF
+		// binary.
+		g_tasks[task_id].entry_addr =
+			get_task_entry_addr(&initrd_addr[base + name_size + CPIO_HEADER_SIZE + padding]);
 
 		// Advance the base to the next file.
 		base += CPIO_HEADER_SIZE + name_size + padding + file_size;

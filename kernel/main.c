@@ -4,13 +4,16 @@
 #include <fbos/sched.h>
 #include <fbos/dt.h>
 
-unsigned long init_stack[4][THREAD_SIZE / sizeof(unsigned long)];
+// Stacks to be used by our processes.
+unsigned long stack[4][THREAD_SIZE / sizeof(unsigned long)];
 
+// Initialize the list of structs by providing a fixed stack address and empty
+// values everywhere else.
 struct task_struct tasks[4] = {
-	[TASK_INIT] = { .stack = init_stack[0], .entry_addr = nullptr, },
-	[TASK_FIZZ] = { .stack = init_stack[1], .entry_addr = nullptr, },
-	[TASK_BUZZ] = { .stack = init_stack[2], .entry_addr = nullptr, },
-	[TASK_FIZZBUZZ] = { .stack = init_stack[3], .entry_addr = nullptr, },
+	[TASK_INIT] = { .stack = stack[0], .entry_addr = nullptr, },
+	[TASK_FIZZ] = { .stack = stack[1], .entry_addr = nullptr, },
+	[TASK_BUZZ] = { .stack = stack[2], .entry_addr = nullptr, },
+	[TASK_FIZZBUZZ] = { .stack = stack[3], .entry_addr = nullptr, },
 };
 
 /*
@@ -24,7 +27,7 @@ __noreturn __kernel void start_kernel(void *dtb)
 
 	// Extract information from the DTB blob.
 	struct initrd_addr addr = find_dt_initrd_addr(dtb);
-	extract_initrd((unsigned char *)addr.start, addr.end - addr.start);
+	extract_initrd((unsigned char *)addr.start, addr.end - addr.start, tasks);
 
 	// At this point everything has already been handled: setup the interrupt
 	// vector and enable the timer to start ticking and scheduling the three

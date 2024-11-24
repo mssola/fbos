@@ -30,7 +30,7 @@ int main(void)
 
 	contents[fsize] = 0;
 
-	extract_initrd(contents, (uint64_t)fsize);
+	extract_initrd(contents, (uint64_t)fsize, tasks);
 	free(contents);
 
 	// TODO

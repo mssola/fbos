@@ -2,6 +2,7 @@
 #define __FBOS_INIT_H
 
 #include <fbos/compiler.h>
+#include <fbos/sched.h>
 
 // Tracks the amount of seconds that have elapsed since activating timer
 // interrupts.
@@ -11,7 +12,8 @@ extern uint64_t seconds_elapsed;
 
 // Extract the executables from the initrd that is located at `base_addr` and
 // has the given `size`.
-void extract_initrd(const unsigned char *const base_addr, uint64_t size);
+void extract_initrd(const unsigned char *const base_addr, uint64_t size,
+					struct task_struct tasks[4]);
 
 // Setup the interrupt vectors and the SBI timer.
 void setup_interrupts(void);
