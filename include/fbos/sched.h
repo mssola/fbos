@@ -12,18 +12,30 @@ enum task_id {
 	TASK_FIZZBUZZ = 3,
 };
 
-// TODO: if we only care about the absolute address, it can be further
-// simplified.
+// All the information we need to grab for processes.
 struct task_struct {
+	// The stack allocated for the process. As you can see when initializing
+	// each process on `kernel/main.c`, we go over the top for its size. There
+	// is also the fact that we need to keep this as the first attribue to allow
+	// for simple `sp` values.
 	void *stack;
-	const void *addr;
-	uint64_t entry_offset;
+
+	// The address for the binary entry.
+	const void *entry_addr;
 };
 
 // Tasks available on this kernel.
 extern struct task_struct tasks[4];
 
-// Switch execution to the given task id.
-void switch_to(int task_id);
+// Switch execution to the given U-mode task. Note that this function will not
+// do the actual returning, but it prepares the relevant registers for an
+// eventual jump.
+__kernel __always_inline void switch_to(int task_id)
+{
+	asm volatile("csrc sstatus, %0\n\t"
+				 "mv ra, %1\n\t"
+				 "csrw sepc, ra" ::"r"(1 << 8),
+				 "r"(tasks[task_id].entry_addr));
+}
 
 #endif // __FBOS_SCHED_H_

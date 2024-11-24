@@ -7,21 +7,11 @@
 unsigned long init_stack[4][THREAD_SIZE / sizeof(unsigned long)];
 
 struct task_struct tasks[4] = {
-	[TASK_INIT] = { .stack = init_stack[0], .addr = nullptr, .entry_offset = 0, },
-	[TASK_FIZZ] = { .stack = init_stack[1], .addr = nullptr, .entry_offset = 0, },
-	[TASK_BUZZ] = { .stack = init_stack[2], .addr = nullptr, .entry_offset = 0, },
-	[TASK_FIZZBUZZ] = { .stack = init_stack[3], .addr = nullptr, .entry_offset = 0, },
+	[TASK_INIT] = { .stack = init_stack[0], .entry_addr = nullptr, },
+	[TASK_FIZZ] = { .stack = init_stack[1], .entry_addr = nullptr, },
+	[TASK_BUZZ] = { .stack = init_stack[2], .entry_addr = nullptr, },
+	[TASK_FIZZBUZZ] = { .stack = init_stack[3], .entry_addr = nullptr, },
 };
-
-// TODO
-__kernel void switch_to(int task_id)
-{
-	const char *ddr = (const char *)tasks[task_id].addr + tasks[task_id].entry_offset;
-
-	asm volatile("csrc sstatus, %[mask]" : : [mask] "r"(1 << 8));
-	asm volatile("mv ra, %0" : : "r"(ddr));
-	asm volatile("csrw sepc, ra");
-}
 
 /*
  * This is the main entry point of the kernel after head.S is done. This

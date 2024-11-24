@@ -101,8 +101,9 @@ __kernel void extract_elf(int task_id, const unsigned char *const addr, size_t s
 	/* }; */
 
 #ifdef __KERNEL__
-	tasks[task_id].addr = (const void *)addr;
-	tasks[task_id].entry_offset = (uint64_t)addr[0x18];
+	uint64_t offset = (uint64_t)addr[0x18];
+
+	tasks[task_id].entry_addr = (const void *)(addr + offset);
 #endif
 }
 
