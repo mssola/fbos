@@ -6,13 +6,13 @@
 #include <fbos/sched.h>
 #include <fbos/mm.h>
 
-unsigned long init_stack[4][THREAD_SIZE / sizeof(unsigned long)];
+unsigned long stack[4][THREAD_SIZE / sizeof(unsigned long)];
 
 struct task_struct tasks[4] = {
-	[0] = { .stack = init_stack[0] },
-	[1] = { .stack = init_stack[1] },
-	[2] = { .stack = init_stack[2] },
-	[3] = { .stack = init_stack[3] },
+	[TASK_INIT] = { .stack = stack[0], .entry_addr = NULL, },
+	[TASK_FIZZ] = { .stack = stack[1], .entry_addr = NULL, },
+	[TASK_BUZZ] = { .stack = stack[2], .entry_addr = NULL, },
+	[TASK_FIZZBUZZ] = { .stack = stack[3], .entry_addr = NULL, },
 };
 
 int main(void)
@@ -33,7 +33,10 @@ int main(void)
 	extract_initrd(contents, (uint64_t)fsize, tasks);
 	free(contents);
 
-	// TODO
+	assert(((uintptr_t)tasks[0].entry_addr & 0xff) == 0xe8);
+	assert(((uintptr_t)tasks[1].entry_addr & 0xff) == 0xbc);
+	assert(((uintptr_t)tasks[2].entry_addr & 0xff) == 0xb4);
+	assert(((uintptr_t)tasks[3].entry_addr & 0xff) == 0x80);
 
 	exit(0);
 }
