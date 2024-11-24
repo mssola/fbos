@@ -13,9 +13,7 @@ struct task_struct tasks[4] = {
 	[TASK_FIZZBUZZ] = { .stack = init_stack[3], .addr = nullptr, .entry_offset = 0, },
 };
 
-int next_task;
-
-// TODO: this feels really brittle
+// TODO
 __kernel void switch_to(int task_id)
 {
 	const char *ddr = (const char *)tasks[task_id].addr + tasks[task_id].entry_offset;
@@ -23,7 +21,6 @@ __kernel void switch_to(int task_id)
 	asm volatile("csrc sstatus, %[mask]" : : [mask] "r"(1 << 8));
 	asm volatile("mv ra, %0" : : "r"(ddr));
 	asm volatile("csrw sepc, ra");
-	asm volatile("sret");
 }
 
 /*
@@ -39,23 +36,14 @@ __noreturn __kernel void start_kernel(void *dtb)
 	struct initrd_addr addr = find_dt_initrd_addr(dtb);
 	extract_initrd((unsigned char *)addr.start, addr.end - addr.start);
 
-	next_task = TASK_UNKNOWN;
-
 	// At this point everything has already been handled: setup the interrupt
 	// vector and enable the timer to start ticking and scheduling the three
 	// tasks at hand.
 	seconds_elapsed = 0;
 	setup_interrupts();
 
-	idle();
-}
-
-__noreturn __kernel void idle(void)
-{
+	// Loop indefinitely while preserving power.
 	for (;;) {
-		if (next_task != TASK_UNKNOWN && next_task != TASK_INIT) {
-			switch_to(next_task);
-		}
 		asm volatile("wfi");
 	}
 }

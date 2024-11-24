@@ -23,10 +23,7 @@ struct task_struct {
 // Tasks available on this kernel.
 extern struct task_struct tasks[4];
 
-// Identifier for the next task to be run.
-extern int next_task;
-
-// Bring the machine to idle mode.
-__noreturn __kernel void idle(void);
+// Switch execution to the given task id.
+void switch_to(int task_id);
 
 #endif // __FBOS_SCHED_H_

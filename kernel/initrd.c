@@ -53,7 +53,9 @@ __kernel uint64_t strtoul16(const char *str, size_t count)
 
 __kernel int get_task_id_from_name(const char *const name)
 {
-	if (strcmp(name, "usr/bin/fizz") == 0) {
+	if (strcmp(name, "usr/bin/init") == 0) {
+		return TASK_INIT;
+	} else if (strcmp(name, "usr/bin/fizz") == 0) {
 		return TASK_FIZZ;
 	} else if (strcmp(name, "usr/bin/buzz") == 0) {
 		return TASK_BUZZ;

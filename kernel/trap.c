@@ -59,12 +59,7 @@ __kernel __always_inline void exception_handler(uint64_t cause)
 		die("Bad syscall\n");
 	}
 
-	// TODO: acknowledge 'sip' bit?
-	next_task = TASK_UNKNOWN;
 	write(message, n);
-
-	// TODO: is it safe to jump to idle here? Any preparation to be done?
-	idle();
 }
 
 /*
@@ -79,6 +74,9 @@ __kernel __always_inline void exception_handler(uint64_t cause)
  * all registers. It's probably a bit over the top since it also does that for
  * registers we never care on this kernel (e.g. floating point registers), but
  * it's convenient.
+ *
+ * TODO: once this properly works, switch it to assembly to avoid creepy
+ * statements like the sad 'goto end' one.
  */
 __aligned(4) __s_interrupt __kernel void interrupt_handler(void)
 {
@@ -87,6 +85,8 @@ __aligned(4) __s_interrupt __kernel void interrupt_handler(void)
 
 	if (IS_EXCEPTION(cause)) {
 		exception_handler(cause);
+		switch_to(TASK_INIT);
+		goto end;
 	}
 
 	if ((cause & TIMER_SCAUSE_MASK) == TIMER_SCAUSE_MASK) {
@@ -101,13 +101,12 @@ __aligned(4) __s_interrupt __kernel void interrupt_handler(void)
 		// BEHOLD! The fizz buzz logic! :D
 		seconds_elapsed += 1;
 		if ((seconds_elapsed % 15) == 0) {
-			next_task = TASK_FIZZBUZZ;
+			switch_to(TASK_FIZZBUZZ);
 		} else if ((seconds_elapsed % 5) == 0) {
-			next_task = TASK_BUZZ;
+			switch_to(TASK_BUZZ);
 		} else if ((seconds_elapsed % 3) == 0) {
-			next_task = TASK_FIZZ;
+			switch_to(TASK_FIZZ);
 		} else {
-			next_task = TASK_UNKNOWN;
 		}
 
 		// Re-enable timer interrupts.
@@ -122,6 +121,8 @@ __aligned(4) __s_interrupt __kernel void interrupt_handler(void)
 	} else {
 		printk("WARN: unknown interrupt just came in...\n");
 	}
+
+end:;
 }
 
 __kernel void setup_interrupts(void)
