@@ -12,6 +12,8 @@ This kernel provides just one system call, `write_and_block`, which allows any
 program to pass the string to be written into the serial port and wait for the
 kernel to re-schedule it.
 
+![Demo on QEMU](./doc/qemu.svg)
+
 ## Build
 
 In order to build `fbos` you only need GCC. That being said, if you are not on a
