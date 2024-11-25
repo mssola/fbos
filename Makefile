@@ -56,13 +56,15 @@ endif
 ##
 # Paths
 
-SRC    = $(filter-out kernel/fbos.ld.S, $(wildcard kernel/*.S kernel/*.c lib/*.c))
-OBJ    = $(patsubst %.c,%.o,$(patsubst %.S,%.o,$(SRC)))
-LINKER = kernel/fbos.ld
-KRNL   = fbos
-USR    = usr/bin/init usr/bin/fizz usr/bin/buzz usr/bin/fizzbuzz
-INIT   = usr/initramfs.cpio
-TESTS  = test/test_dt test/test_initrd
+SRC     = $(filter-out kernel/fbos.ld.S, $(wildcard kernel/*.S kernel/*.c lib/*.c))
+OBJ     = $(patsubst %.c,%.o,$(patsubst %.S,%.o,$(SRC)))
+LINKER  = kernel/fbos.ld
+KRNL    = fbos
+USR     = usr/bin/init usr/bin/fizz usr/bin/buzz usr/bin/fizzbuzz
+INIT    = usr/initramfs.cpio
+TESTS   = test/test_dt test/test_initrd
+TMP     = tmp/
+ARCHIVE = fbos.tar.gz
 
 LDFLAGS += -T $(LINKER)
 
@@ -128,6 +130,18 @@ test/%: test/%.o
 	$(Q) $(HOSTCC) -Iinclude/ $< test/lib/*.o -o $@
 
 ##
+# Produce an archive for releases.
+
+.PHONY: archive
+archive: all
+	$(Q) rm -rf $(TMP) && mkdir -p $(TMP)
+	$(Q) cp -r usr/ $(TMP) && rm -r $(TMP)/usr/src
+	$(Q) cp $(KRNL) $(TMP)
+	$(Q) tar czf $(ARCHIVE) $(TMP)
+	$(Q) rm -rf $(TMP)
+	$(E) "	TAR	 $(ARCHIVE)"
+
+##
 # Hacking
 
 .PHONY: qemu
@@ -144,7 +158,7 @@ gdb:
 
 .PHONY: clean
 clean:
-	$(Q) rm -f $(OBJ) $(KRNL) $(LINKER) $(USR) usr/src/*.o $(INIT) test/*.o test/lib/*.o $(TESTS)
+	$(Q) rm -rf $(OBJ) $(KRNL) $(LINKER) $(USR) usr/src/*.o $(INIT) test/*.o test/lib/*.o $(TESTS) $(TMP) $(ARCHIVE)
 
 .PHONY: lint
 lint:
