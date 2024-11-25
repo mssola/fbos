@@ -49,7 +49,7 @@ ifeq ($(strip $(DEBUG)),)
 	QEMU_FLAGS += -nographic
 else
 	ASFLAGS += -g
-	CCFLAGS += -g
+	CCFLAGS += -g -D__DEBUG__
 	QEMU_FLAGS += -s -S
 endif
 

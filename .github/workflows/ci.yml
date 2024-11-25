@@ -25,5 +25,5 @@ jobs:
       - name: Lint
         run: make lint V=1
 
-      - name: Check that it builds
+      - name: Build and run unit tests
         run: make V=1
