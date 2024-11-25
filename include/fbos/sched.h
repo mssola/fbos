@@ -33,9 +33,10 @@ extern struct task_struct tasks[4];
 __kernel __always_inline void switch_to(int task_id)
 {
 	asm volatile("csrc sstatus, %0\n\t"
-				 "mv ra, %1\n\t"
-				 "csrw sepc, ra" ::"r"(1 << 8),
-				 "r"(tasks[task_id].entry_addr));
+				 "mv t0, %1\n\t"
+				 "csrw sepc, t0" ::"r"(1 << 8),
+				 "r"(tasks[task_id].entry_addr)
+				 : "t0");
 }
 
 #endif // __FBOS_SCHED_H_
