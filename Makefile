@@ -120,7 +120,7 @@ test: host_lib usr $(TESTS)
 host_lib:
 	$(Q) mkdir -p test/lib
 	$(Q) $(HOSTCC) $(WARNINGS) -Iinclude/ -g -c lib/dt.c -o test/lib/dt.o
-	$(Q) $(HOSTCC) $(WARNINGS) -Iinclude/ -g -c kernel/initrd.c -o test/lib/initrd.o
+	$(Q) $(HOSTCC) $(WARNINGS) -Iinclude/ -g -c lib/initrd.c -o test/lib/initrd.o
 
 test/%.o: test/%.c
 	$(Q) $(HOSTCC) $(WARNINGS) -g -Iinclude/ -c $< -o $@
