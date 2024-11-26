@@ -19,11 +19,17 @@ int main(void)
 
 	contents[fsize] = 0;
 
-	struct initrd_addr addr = find_dt_initrd_addr(contents);
+	struct dt_info info = {
+		.cpu_freq = 0,
+		.initrd_start = 0,
+		.initrd_end = 0,
+	};
+	get_dt_info(contents, &info);
 	free(contents);
 
-	assert(addr.start == 0x84200000);
-	assert(addr.end == 0x84200c00);
+	assert(info.initrd_start == 0x84200000);
+	assert(info.initrd_end == 0x84200c00);
+	assert(info.cpu_freq == 0x989680);
 
 	exit(0);
 }

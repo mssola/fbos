@@ -29,13 +29,12 @@ struct fdt_header {
 
 /*
  * Find the device tree property by "name" starting at the given index "idx".
- * This function assumes that the property is exactly 8 bytes long (hey, it's
- * not so general purpose after all :D).
+ * The size of the property is to be provided by `prop_size`.
  *
  * Returns -1 if the given property could not be found.
  */
 __kernel int64_t find_dt_property_from(uint32_t *dtb, struct fdt_header *header, uint32_t idx,
-									   const char *const name)
+									   const char *const name, size_t prop_size)
 {
 	char *base_dt_string = ((char *)dtb) + header->off_dt_string;
 	uint32_t len, nameoff;
@@ -45,7 +44,10 @@ __kernel int64_t find_dt_property_from(uint32_t *dtb, struct fdt_header *header,
 		len = __bswap_constant_32(dtb[idx + 1]);
 		nameoff = __bswap_constant_32(dtb[idx + 2]);
 
-		if (len == 8 && strcmp(&base_dt_string[nameoff], name) == 0) {
+		if (len == prop_size && strcmp(&base_dt_string[nameoff], name) == 0) {
+			if (len == sizeof(uint32_t)) {
+				return (int64_t)__bswap_constant_32(dtb[idx + 3]);
+			}
 			ret = (int64_t)__bswap_constant_32(dtb[idx + 3]) << 32;
 			ret += (int64_t)__bswap_constant_32(dtb[idx + 4]);
 			return ret;
@@ -57,27 +59,30 @@ __kernel int64_t find_dt_property_from(uint32_t *dtb, struct fdt_header *header,
 	return -1;
 }
 
-// Find the "initrd" values from the given DTB blob. Returns an empty
-// `initrd_addr` if these values could not be found.
-__kernel struct initrd_addr __find_dt_initrd_addr(uint32_t *dtb, struct fdt_header *header)
+/*
+ * Returns the index of the node identified by 'name' into the 'dtb' blob. This
+ * index will already account for the padding.
+ *
+ * Returns -1 if the node could not be found.
+ */
+__kernel int32_t find_dt_node(uint32_t *dtb, struct fdt_header *header, const char *const name)
 {
 	uint32_t idx;
-	struct initrd_addr ret = {
-		.start = 0,
-		.end = 0,
-	};
 
 	// Try to find out the 32-bit offset of the "chosen" property inside of the
 	// FDT structure block.
 	for (idx = header->off_dt_struct; idx < header->size_dt_struct; idx++) {
 		/*
-		 * We only care about beginning of nodes, and then that the block is
-		 * literally named "chosen". After that, our offset will be that + 3
-		 * (skipping FDT_BEGIN_NODE + 2 that takes "chosen" with padding for
-		 * alignment).
+		 * We only care about beginning of nodes, and then that the block has
+		 * the interesting 'name'. After that, our offset will be that + 3
+		 * (skipping FDT_BEGIN_NODE + 2 that takes "chosen/cpus" with padding
+		 * for alignment).
+		 *
+		 * NOTE: for future extension, the +2 stems from "chosen/cpus". If there
+		 * is another node name to be found, we are cooked.
 		 */
 		if (dtb[idx] == FDT_BEGIN_NODE_LE) {
-			if (strcmp((char *)&dtb[idx + 1], "chosen") == 0) {
+			if (strcmp((char *)&dtb[idx + 1], name) == 0) {
 				idx += 3;
 				break;
 			}
@@ -86,7 +91,32 @@ __kernel struct initrd_addr __find_dt_initrd_addr(uint32_t *dtb, struct fdt_head
 
 	// "chosen" property could not be found. Leave early with an empty result.
 	if (idx == header->size_dt_struct || dtb[idx] != FDT_PROP_LE) {
-		return ret;
+		return -1;
+	}
+	return (int32_t)idx;
+}
+
+// Set the 'cpu_freq' field of 'info' if available on the 'dtb' blob.
+__kernel void set_cpu_freq(uint32_t *dtb, struct dt_info *info, struct fdt_header *header)
+{
+	int32_t idx = find_dt_node(dtb, header, "cpus");
+	if (idx < 0) {
+		return;
+	}
+
+	int64_t i =
+		find_dt_property_from(dtb, header, (uint32_t)idx, "timebase-frequency", sizeof(uint32_t));
+	if (i > 0) {
+		info->cpu_freq = (uint64_t)i;
+	}
+}
+
+// Set the "initrd" values from the given 'dtb' blob into 'info'.
+__kernel void set_initrd_addr(uint32_t *dtb, struct dt_info *info, struct fdt_header *header)
+{
+	int32_t idx = find_dt_node(dtb, header, "chosen");
+	if (idx < 0) {
+		return;
 	}
 
 	/*
@@ -94,23 +124,22 @@ __kernel struct initrd_addr __find_dt_initrd_addr(uint32_t *dtb, struct fdt_head
 	 * values and return that.
 	 */
 
-	int64_t i = find_dt_property_from(dtb, header, idx, "linux,initrd-start");
+	int64_t i =
+		find_dt_property_from(dtb, header, (uint32_t)idx, "linux,initrd-start", sizeof(uint64_t));
 	if (i < 0) {
-		return ret;
+		return;
 	}
-	ret.start = (uintptr_t)i;
+	info->initrd_start = (uintptr_t)i;
 
-	i = find_dt_property_from(dtb, header, idx, "linux,initrd-end");
+	i = find_dt_property_from(dtb, header, (uint32_t)idx, "linux,initrd-end", sizeof(uint64_t));
 	if (i < 0) {
-		ret.start = 0;
-		return ret;
+		info->initrd_start = 0;
+		return;
 	}
-	ret.end = (uintptr_t)i;
-
-	return ret;
+	info->initrd_end = (uintptr_t)i;
 }
 
-__kernel struct initrd_addr find_dt_initrd_addr(uint32_t *dtb)
+__kernel void get_dt_info(uint32_t *dtb, struct dt_info *info)
 {
 	if (dtb[0] != FDT_MAGIC_LE) {
 		die("FDT structure does not have a valid magic identifier\n");
@@ -122,5 +151,15 @@ __kernel struct initrd_addr find_dt_initrd_addr(uint32_t *dtb)
 		.size_dt_struct = __bswap_constant_32(dtb[9]) / sizeof(uint32_t),
 	};
 
-	return __find_dt_initrd_addr(dtb, &header);
+	set_initrd_addr(dtb, info, &header);
+	if (!info->initrd_start || !info->initrd_end) {
+		die("Could not fetch the addresses for the initramfs\n");
+	}
+
+	set_cpu_freq(dtb, info, &header);
+	if (!info->cpu_freq) {
+		printk("WARNING: could not figure out the CPU frequency. "
+			   "Defaulting to 10000000 even if this might be bad\n");
+		info->cpu_freq = DEFAULT_CPU_FREQ;
+	}
 }

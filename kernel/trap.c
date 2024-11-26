@@ -1,13 +1,6 @@
 #include <fbos/init.h>
 #include <fbos/sbi.h>
 #include <fbos/printk.h>
-#include <fbos/sched.h>
-
-// TODO: this is QEMU-specific. To obtain this:
-//   - Parse the DTB and look for the 'cpus.timebase-frequency' property.
-//   - If the system is on ACPI (e.g. VisionFive2), then the frequency has to be
-//     picked up from somewhere else (constant on known boards?).
-#define TICKS_PER_SECOND 10000000
 
 // Mask for 'scause' to check whether it came from an interrupt or an exception.
 #define INTERRUPT_MASK 0x8000000000000000
@@ -34,10 +27,10 @@ __kernel void time_out_in_one_second(void)
 	register uint64_t one_second asm("a0");
 
 	asm volatile("rdtime t0\n\t"
-				 "li t1, %1\n\t"
+				 "mv t1, %1\n\t"
 				 "add %0, t0, t1"
 				 : "=r"(one_second)
-				 : "i"(TICKS_PER_SECOND)
+				 : "r"(info.cpu_freq)
 				 : "t0", "t1");
 
 	ret = sbi_ecall1(TIME_EXT, TIME_SET_TIMER, one_second);
