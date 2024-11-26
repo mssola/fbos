@@ -96,6 +96,54 @@ __kernel int32_t find_dt_node(uint32_t *dtb, struct fdt_header *header, const ch
 	return (int32_t)idx;
 }
 
+// Returns the index in the 'dtb' of the first proper node.
+__kernel uint32_t first_dt_node(uint32_t *dtb, struct fdt_header *header)
+{
+	uint32_t idx;
+
+	for (idx = header->off_dt_struct; idx < header->size_dt_struct; idx++) {
+		if (dtb[idx] == FDT_BEGIN_NODE_LE) {
+			return idx;
+		}
+	}
+
+	return 0;
+}
+
+// Set the 'model' buffer from 'info' if available on the 'dtb' blob.
+__kernel void set_dt_model(uint32_t *dtb, struct dt_info *info, struct fdt_header *header)
+{
+	uint32_t len, nameoff;
+	uint32_t idx = first_dt_node(dtb, header);
+	char *base_dt_string = ((char *)dtb) + header->off_dt_string;
+
+	while (idx < header->size_dt_struct) {
+		len = __bswap_constant_32(dtb[idx + 1]);
+		nameoff = __bswap_constant_32(dtb[idx + 2]);
+		idx += 3;
+
+		if (strcmp(&base_dt_string[nameoff], "model") == 0) {
+			// In the (very unlikely) case that the model string is huge, don't
+			// even try.
+			if (len >= DT_MODEL_MAX) {
+				printk("WARNING: The model string is too large!\n");
+				break;
+			}
+
+			// And copy the string. Since we know the length of it, we can
+			// simply use 'memcpy' which is already available on kernel code as
+			// well.
+			memcpy(info->model, (char *)&dtb[idx], len);
+			info->model[len] = '\0';
+			break;
+		}
+
+		// Skip until the beginning of the next node.
+		for (; dtb[idx] != FDT_PROP_LE && idx < header->size_dt_struct; idx++)
+			;
+	}
+}
+
 // Set the 'cpu_freq' field of 'info' if available on the 'dtb' blob.
 __kernel void set_cpu_freq(uint32_t *dtb, struct dt_info *info, struct fdt_header *header)
 {
@@ -150,6 +198,8 @@ __kernel void get_dt_info(uint32_t *dtb, struct dt_info *info)
 		.off_dt_string = __bswap_constant_32(dtb[3]),
 		.size_dt_struct = __bswap_constant_32(dtb[9]) / sizeof(uint32_t),
 	};
+
+	set_dt_model(dtb, info, &header);
 
 	set_initrd_addr(dtb, info, &header);
 	if (!info->initrd_start || !info->initrd_end) {

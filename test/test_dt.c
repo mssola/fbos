@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 #include <fbos/dt.h>
 
@@ -28,6 +29,7 @@ void dt_info_from(const char *const path, struct dt_info *info)
 void test_qemu(void)
 {
 	struct dt_info info = {
+		.model = { '\0' },
 		.cpu_freq = 0,
 		.initrd_start = 0,
 		.initrd_end = 0,
@@ -38,11 +40,13 @@ void test_qemu(void)
 	assert(info.initrd_start == 0x84200000);
 	assert(info.initrd_end == 0x84200c00);
 	assert(info.cpu_freq == 0x989680);
+	assert(strcmp(info.model, "riscv-virtio,qemu") == 0);
 }
 
 void test_vf2(void)
 {
 	struct dt_info info = {
+		.model = { '\0' },
 		.cpu_freq = 0,
 		.initrd_start = 0,
 		.initrd_end = 0,
@@ -53,6 +57,7 @@ void test_vf2(void)
 	assert(info.initrd_start == 0x46100000);
 	assert(info.initrd_end == 0x47139ce3);
 	assert(info.cpu_freq == 0x3d0900);
+	assert(strcmp(info.model, "StarFive VisionFive 2 v1.3B") == 0);
 }
 
 int main(void)

@@ -6,8 +6,14 @@
 // Default value for the 'dt_info.cpu_freq' property if none could be retrieved.
 #define DEFAULT_CPU_FREQ 10000000
 
+// Maximum length for the string representing the model.
+#define DT_MODEL_MAX 64
+
 // Holds all the information that we gather from the initial DeviceTree blob.
 struct dt_info {
+	// Model of the system that this kernel is running on.
+	char model[DT_MODEL_MAX];
+
 	// Ticks per second. If `get_dt_info` fails at setting this value, then
 	// `DEFAULT_CPU_FREQ` is used.
 	uint64_t cpu_freq;

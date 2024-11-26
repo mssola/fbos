@@ -18,6 +18,7 @@ struct task_struct tasks[4] = {
 
 // Defined in fbos/init.h.
 struct dt_info info = {
+	.model = { '\0' },
 	.cpu_freq = 0,
 	.initrd_start = 0,
 	.initrd_end = 0,
@@ -35,6 +36,13 @@ __noreturn __kernel void start_kernel(void *dtb)
 	// Extract information from the DTB blob.
 	get_dt_info(dtb, &info);
 	extract_initrd((unsigned char *)info.initrd_start, info.initrd_end - info.initrd_start, tasks);
+
+	// If we were able to fetch the model, print it now.
+	if (info.model[0] != '\0') {
+		printk("Running on: ");
+		printk(info.model);
+		printk("\n");
+	}
 
 	// At this point everything has already been handled: setup the interrupt
 	// vector and enable the timer to start ticking and scheduling the three
