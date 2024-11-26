@@ -9,33 +9,16 @@
 #define CPIO_HEADER_NAMESIZE 94
 #define CPIO_HEADER_SIZE 110
 
-// TODO: move to assembly
-__kernel void *memcpy(void *dest, const void *src, size_t count)
-{
-	char *destc = dest;
-	const char *srcc = src;
-
-	for (uint64_t i = 0; i < count; i++) {
-		*destc++ = *srcc++;
-	}
-	return dest;
-}
-
-// TODO: this is required by GCC which must be doing some optimization
-// underneath. For now let's keep it simple (and wrong) by just calling memcpy.
-__kernel void *memmove(void *dest, const void *src, size_t count)
-{
-	return memcpy(dest, src, count);
-}
-
-__kernel uint64_t strtoul16(const char *str, size_t count)
+// Converts the given string 'str' of 'n' length to an integer by assuming it's
+// in base 16.
+__kernel uint64_t strtoul16(const char *str, size_t n)
 {
 	char c;
 	uint64_t ret = 0;
 	uint64_t aux = 0;
 
-	for (uint64_t i = 1; count > 0; i *= 16, count--) {
-		c = str[count - 1];
+	for (uint64_t i = 1; n > 0; i *= 16, n--) {
+		c = str[n - 1];
 		if (c >= 'A' && c <= 'F') {
 			aux = 10 + (uint64_t)(c - 'A');
 		} else if (c >= 'a' && c <= 'f') {

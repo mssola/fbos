@@ -51,7 +51,7 @@ strcmp:
  *     int memcmp(const void *ptr1, const void *ptr2, size_t n)
  *
  * Returns (a0): comparison result as in stdlib.
- * Parameter (a0, a1): strings to compare.
+ * Parameters (a0, a1): strings to compare.
  * Clobbers: t0, t1.
  */
 .global memcmp
@@ -69,4 +69,29 @@ memcmp:
 	ret
 2:
 	sub a0, t0, t1
+	ret
+
+/*
+ * Defined in include/fbos/string.h
+ *
+ *     void memcpy(const void *dest, const void *src, size_t count)
+ *
+ * Parameter a0: destination string.
+ * Parameter a1: source string.
+ * Parameter a2: number of bytes to copy.
+ * Clobbers: t0.
+ */
+.global memcpy
+.type memcpy, @function
+memcpy:
+1:
+	beqz a2, 3f
+2:
+	lbu t0, 0(a1)
+	sb t0, 0(a0)
+	addi a0, a0, 1
+	addi a1, a1, 1
+	addi a2, a2, -1
+	bnez a2, 2b
+3:
 	ret
