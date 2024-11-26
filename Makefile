@@ -56,7 +56,7 @@ endif
 ##
 # Paths
 
-SRC     = $(filter-out kernel/fbos.ld.S, $(wildcard kernel/*.S kernel/*.c lib/*.c))
+SRC     = $(filter-out kernel/fbos.ld.S, $(wildcard kernel/*.S kernel/*.c lib/*.c lib/*.S))
 OBJ     = $(patsubst %.c,%.o,$(patsubst %.S,%.o,$(SRC)))
 LINKER  = kernel/fbos.ld
 KRNL    = fbos
