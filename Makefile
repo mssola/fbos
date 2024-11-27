@@ -63,7 +63,6 @@ KRNL    = fbos
 USR     = usr/bin/init usr/bin/fizz usr/bin/buzz usr/bin/fizzbuzz
 INIT    = usr/initramfs.cpio
 TESTS   = test/test_dt test/test_initrd
-TMP     = tmp/
 ARCHIVE = fbos.tar.gz
 
 LDFLAGS += -T $(LINKER)
@@ -134,11 +133,10 @@ test/%: test/%.o
 
 .PHONY: archive
 archive: all
-	$(Q) rm -rf $(TMP) && mkdir -p $(TMP)
-	$(Q) cp -r usr/ $(TMP) && rm -r $(TMP)/usr/src
-	$(Q) cp $(KRNL) $(TMP)
-	$(Q) tar czf $(ARCHIVE) $(TMP)
-	$(Q) rm -rf $(TMP)
+	$(Q) $(eval DIR := $(shell mktemp -d))
+	$(Q) mkdir -p $(DIR)/fbos && cp $(KRNL) $(INIT) $(DIR)/fbos/
+	$(Q) cd $(DIR) && tar czf $(ARCHIVE) fbos/
+	$(Q) cp $(DIR)/$(ARCHIVE) .
 	$(E) "	TAR	 $(ARCHIVE)"
 
 ##
@@ -158,7 +156,7 @@ gdb:
 
 .PHONY: clean
 clean:
-	$(Q) rm -rf $(OBJ) $(KRNL) $(LINKER) $(USR) usr/src/*.o $(INIT) test/*.o test/lib/*.o $(TESTS) $(TMP) $(ARCHIVE)
+	$(Q) rm -rf $(OBJ) $(KRNL) $(LINKER) $(USR) usr/src/*.o $(INIT) test/*.o test/lib/*.o $(TESTS) $(ARCHIVE)
 
 .PHONY: lint
 lint:
