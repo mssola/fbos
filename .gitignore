@@ -1,6 +1,7 @@
 *.o
 kernel/fbos.ld
 /fbos
+/fbos.elf
 .cache
 
 usr/bin/*

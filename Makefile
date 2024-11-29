@@ -79,7 +79,6 @@ all: clean $(IMAGE) usr test
 $(IMAGE): $(KRNL)
 	$(E) "	OBJCOPY	" $@
 	$(Q) $(OBJCPY) $(KRNL) -O binary $(IMAGE)
-	$(Q) rm $(KRNL)
 
 .PHONY: $(KRNL)
 $(KRNL): $(OBJ) $(LINKER).S
