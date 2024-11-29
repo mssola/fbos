@@ -8,11 +8,9 @@ are unaware of each other and it's up to the kernel to schedule them by using
 the timer interrupts as given by openSBI (`fizz` on % 3 seconds, `buzz` on % 5
 seconds, and `fizzbuzz` on % 15 seconds).
 
-This kernel provides just one system call, `write_and_block`, which allows any
-program to pass the string to be written into the serial port and wait for the
-kernel to re-schedule it.
-
-![Demo on QEMU](./doc/qemu.svg)
+This kernel provides just one system call, `write`, which allows any program to
+pass the string to be written into the serial port and wait for the kernel to
+re-schedule it.
 
 ## Build
 
@@ -75,8 +73,12 @@ $ make qemu
 
 This will open up QEMU in `-nographic` mode (hence the serial output will be
 simply redirected to stdout), and you will be able to see the whole thing
-working. Moreover, the `qemu` target can be paired with the `DEBUG` parameter
-that you can pass to make. Hence, you can also call it like so:
+working. Just like this:
+
+![Demo on QEMU](./doc/qemu.svg)
+
+Moreover, the `qemu` target can be paired with the `DEBUG` parameter that you
+can pass to make. Hence, you can also call it like so:
 
 ```
 $ make qemu DEBUG=1
@@ -105,6 +107,34 @@ $ make gdb GDB_EXTRA_FLAGS="-tui"
 ```
 
 And now you have started a GDB session with a nice TUI interface.
+
+### VisionFive 2
+
+This kernel can also be run on real hardware. In particular, I have tested it
+with the Starfive VisionFive 2 board. I have tested this with an existing Linux
+installation. In there, I have modified the bootloader configuration so I have
+now this entry:
+
+```
+label l6
+	menu label FizzBuzz OS
+	linux /fbos
+	initrd /initramfs.cpio
+	fdtdir /dtbs/<versioned directory>
+```
+
+In order to get the needed files, you can use the `archive` make target:
+
+```
+make archive
+```
+
+Copy this tarball to your board and then place the `fbos` binary image and the
+`initramfs.cpio` file into `/boot`. When you reset your board, you will get the
+new entry from U-Boot and you will be able to run the kernel from there. Like
+this:
+
+![Demo on VisionFive 2](./doc/vf2.svg)
 
 ## Requirements
 

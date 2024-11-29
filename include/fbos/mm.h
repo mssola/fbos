@@ -17,7 +17,8 @@
  * The code will be linked to start at the first page, which will have a given
  * offset.
  */
+
 #define PAGE_OFFSET 0x80200000
-#define LINK_ADDR PAGE_OFFSET
+#define LOAD_OFFSET PAGE_OFFSET
 
 #endif /* __FBOS_MM_H */

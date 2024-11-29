@@ -20,7 +20,8 @@ endif
 CC     = $(CROSS_COMPILE)gcc$(CC_SUFFIX)
 LD     = $(CROSS_COMPILE)ld
 HOSTCC = gcc$(CC_SUFFIX)
-QEMU ?= qemu-system-riscv64
+QEMU  ?= qemu-system-riscv64
+OBJCPY = $(CROSS_COMPILE)objcopy
 
 ISA      ?= rv64imafdc_zicntr_zicsr_zifencei_zihpm_zca_zcd_zba_zbb
 ASFLAGS   = -march=$(ISA) -mabi=lp64d -mcmodel=medany -fno-PIE
@@ -59,7 +60,8 @@ endif
 SRC     = $(filter-out kernel/fbos.ld.S, $(wildcard kernel/*.S kernel/*.c lib/*.c lib/*.S))
 OBJ     = $(patsubst %.c,%.o,$(patsubst %.S,%.o,$(SRC)))
 LINKER  = kernel/fbos.ld
-KRNL    = fbos
+IMAGE   = fbos
+KRNL    = $(IMAGE).elf
 USR     = usr/bin/init usr/bin/fizz usr/bin/buzz usr/bin/fizzbuzz
 INIT    = usr/initramfs.cpio
 TESTS   = test/test_dt test/test_initrd
@@ -71,7 +73,13 @@ LDFLAGS += -T $(LINKER)
 # Kernel
 
 .PHONY: all
-all: clean $(KRNL) usr test
+all: clean $(IMAGE) usr test
+
+.PHONY: $(IMAGE)
+$(IMAGE): $(KRNL)
+	$(E) "	OBJCOPY	" $@
+	$(Q) $(OBJCPY) $(KRNL) -O binary $(IMAGE)
+	$(Q) rm $(KRNL)
 
 .PHONY: $(KRNL)
 $(KRNL): $(OBJ) $(LINKER).S
@@ -134,7 +142,7 @@ test/%: test/%.o
 .PHONY: archive
 archive: all
 	$(Q) $(eval DIR := $(shell mktemp -d))
-	$(Q) mkdir -p $(DIR)/fbos && cp $(KRNL) $(INIT) $(DIR)/fbos/
+	$(Q) mkdir -p $(DIR)/fbos && cp $(IMAGE) $(INIT) $(DIR)/fbos/
 	$(Q) cd $(DIR) && tar czf $(ARCHIVE) fbos/
 	$(Q) cp $(DIR)/$(ARCHIVE) .
 	$(E) "	TAR	 $(ARCHIVE)"
@@ -143,11 +151,11 @@ archive: all
 # Hacking
 
 .PHONY: qemu
-qemu: clean $(KRNL) usr
+qemu: clean $(IMAGE) usr
 ifeq ($(strip $(QEMU_BIOS)),)
-	$(Q) $(QEMU) $(QEMU_FLAGS) -machine virt -kernel $(KRNL) -initrd $(INIT)
+	$(Q) $(QEMU) $(QEMU_FLAGS) -machine virt -kernel $(IMAGE) -initrd $(INIT)
 else
-	$(Q) $(QEMU) $(QEMU_FLAGS) -machine virt -bios $(QEMU_BIOS) -kernel $(KRNL) -initrd $(INIT)
+	$(Q) $(QEMU) $(QEMU_FLAGS) -machine virt -bios $(QEMU_BIOS) -kernel $(IMAGE) -initrd $(INIT)
 endif
 
 .PHONY: gdb
@@ -156,7 +164,7 @@ gdb:
 
 .PHONY: clean
 clean:
-	$(Q) rm -rf $(OBJ) $(KRNL) $(LINKER) $(USR) usr/src/*.o $(INIT) test/*.o test/lib/*.o $(TESTS) $(ARCHIVE)
+	$(Q) rm -rf $(OBJ) $(KRNL) $(IMAGE) $(LINKER) $(USR) usr/src/*.o $(INIT) test/*.o test/lib/*.o $(TESTS) $(ARCHIVE)
 
 .PHONY: lint
 lint:

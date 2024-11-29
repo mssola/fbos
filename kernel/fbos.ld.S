@@ -1,8 +1,11 @@
 #include <fbos/mm.h>
 
+OUTPUT_ARCH(riscv)
+ENTRY(_start)
+
 SECTIONS {
 	// Ensure that the image starts at the very exact address SBI expects it to.
-	. = LINK_ADDR;
+	. = LOAD_OFFSET;
 	_start = .;
 	. = ALIGN(PAGE_SIZE);
 
@@ -10,8 +13,9 @@ SECTIONS {
 	// instead of clumping it into the main `.text` one. Well, I'm no expert on
 	// linker configuration, so patches are welcome :)
 	.text : {
+		// head.S
+		KEEP(*(.head.text))
 		_text = .;
-		*(.head.text)
 
 		// Aligning it to a full page is maybe a bit too much considering how
 		// small `.text.head` really is. I just saw this same thing on the Linux
@@ -19,7 +23,7 @@ SECTIONS {
 		. = ALIGN(PAGE_SIZE);
 
 		// From now on the rest of the `.text` could just be a continuation, but
-		// I further split it into `.text.kernel` so the jump from head isn't
+		// I further split it into `.kernel.text` so the jump from head isn't
 		// that large. That is, we put first the very core of the kernel, and
 		// the rest can go wherever.
 		__kernel_text_start = .;
