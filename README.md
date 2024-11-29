@@ -153,13 +153,15 @@ things simple. Hence, here there are some limitations/requirements:
 
 ## Special thanks to
 
-SUSE for organizing [Hack Week 24](https://hackweek.opensuse.org/24/projects).
-This project was mainly developed during this time.
-
-I have also taken lots of valuable input by reading [Popovic's
-blog](https://popovicu.com/), so thanks a lot for writing such clear articles on
-a rather obscure topic. In a similar way, I have also taken the time to read a
-lot of code from the Linux Kernel. My understanding of both RISC-V and the Linux
-Kernel itself has vastly improved with this exercise, so I'd also like to take
-the chance to be grateful to the many people who have contributed to this vast
-undertaking that is the Linux Kernel.
+- SUSE for organizing [Hack Week 24](https://hackweek.opensuse.org/24/projects).
+  This project was mainly developed during this time.
+- [Ricardo B. Marliere](https://github.com/rbmarliere) for contributing to the
+  project with code, ideas and shared knowledge.
+- I have also taken lots of valuable input by reading [Popovic's
+  blog](https://popovicu.com/), so thanks a lot for writing such clear articles
+  on a rather obscure topic.
+- In a similar way, I have also taken the time to read a lot of code from the
+  Linux Kernel. My understanding of both RISC-V and the Linux Kernel itself has
+  vastly improved with this exercise, so I'd also like to take the chance to be
+  grateful to the many people who have contributed to this vast undertaking that
+  is the Linux Kernel.
