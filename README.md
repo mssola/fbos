@@ -47,25 +47,9 @@ whenever you'd want to debug the kernel via QEMU+GDB. Read more on this below.
 ## Test
 ### QEMU
 
-The easiest way to test the `fbos` binary from the build step is with QEMU. That
-being said, this kernel only supports the bootflow of openSBI `fw_dynamic`. If
-you have a recent enough QEMU, then that's not a problem and you can skip the
-next step. Otherwise you might need to specify the BIOS firmware that you'll
-have to compile from openSBI. If you are on that side, don't worry, it's not
-that hard:
-
-```
-$ git clone https://github.com/riscv-software-src/opensbi.git
-$ cd opensbi
-$ make ARCH=riscv CROSS_COMPILE=<your-cross-compile> PLATFORM=generic
-# => build/platform/generic/firmware/fw_dynamic.bin
-```
-
-With that simply set the `QEMU_BIOS` environment variable with the full path of
-the resulting `fw_dynamic.bin` file.
-
-Now make sure that you have a QEMU version that is able to emulate a RISC-V
-system. After that, simply run:
+The easiest way to test the `fbos` binary from the build step is with QEMU. You
+need a QEMU version that is recent enough (see [requirements](#requirements))
+and that is able to virtualize a RISC-V system. With that, simply run:
 
 ```
 $ make qemu

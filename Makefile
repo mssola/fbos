@@ -37,7 +37,6 @@ USRFLAGS  = -static -melf64lriscv
 # Optional parameters for QEMU and gdb.
 
 QEMU_FLAGS      ?=
-QEMU_BIOS       ?=
 GDB_EXTRA_FLAGS ?=
 
 ##
@@ -151,11 +150,7 @@ archive: all
 
 .PHONY: qemu
 qemu: clean $(IMAGE) usr
-ifeq ($(strip $(QEMU_BIOS)),)
 	$(Q) $(QEMU) $(QEMU_FLAGS) -machine virt -kernel $(IMAGE) -initrd $(INIT)
-else
-	$(Q) $(QEMU) $(QEMU_FLAGS) -machine virt -bios $(QEMU_BIOS) -kernel $(IMAGE) -initrd $(INIT)
-endif
 
 .PHONY: gdb
 gdb:
