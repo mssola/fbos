@@ -78,7 +78,7 @@ __aligned(4) __s_interrupt __kernel void interrupt_handler(void)
 
 	if (IS_EXCEPTION(cause)) {
 		exception_handler(cause);
-		switch_to(TASK_INIT);
+		set_return_address_to(TASK_INIT);
 		goto end;
 	}
 
@@ -94,12 +94,11 @@ __aligned(4) __s_interrupt __kernel void interrupt_handler(void)
 		// BEHOLD! The fizz buzz logic! :D
 		seconds_elapsed += 1;
 		if ((seconds_elapsed % 15) == 0) {
-			switch_to(TASK_FIZZBUZZ);
+			set_return_address_to(TASK_FIZZBUZZ);
 		} else if ((seconds_elapsed % 5) == 0) {
-			switch_to(TASK_BUZZ);
+			set_return_address_to(TASK_BUZZ);
 		} else if ((seconds_elapsed % 3) == 0) {
-			switch_to(TASK_FIZZ);
-		} else {
+			set_return_address_to(TASK_FIZZ);
 		}
 
 		// Re-enable timer interrupts.

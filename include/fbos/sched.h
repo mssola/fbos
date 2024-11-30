@@ -27,10 +27,8 @@ struct task_struct {
 // Tasks available on this kernel.
 extern struct task_struct tasks[4];
 
-// Switch execution to the given U-mode task. Note that this function will not
-// do the actual returning, but it prepares the relevant registers for an
-// eventual jump.
-__kernel __always_inline void switch_to(int task_id)
+// Set the return address to U-mode to the given task.
+__kernel __always_inline void set_return_address_to(int task_id)
 {
 	asm volatile("csrc sstatus, %0\n\t"
 				 "mv t0, %1\n\t"
