@@ -94,7 +94,9 @@ _start_kernel:
 	li t6, 0
 	csrw sscratch, 0
 
-	// Point tp and sp to the init task.
+	// Point tp and sp to the init task. This is not crucial because in the end
+	// we are not doing anything with the 'tp' register, and our processes
+	// actually don't do anything on the stack.
 	la tp, tasks
 	la sp, tasks + THREAD_SIZE
 

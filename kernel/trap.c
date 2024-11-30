@@ -67,9 +67,6 @@ __kernel __always_inline void exception_handler(uint64_t cause)
  * all registers. It's probably a bit over the top since it also does that for
  * registers we never care on this kernel (e.g. floating point registers), but
  * it's convenient.
- *
- * TODO: once this properly works, switch it to assembly to avoid creepy
- * statements like the sad 'goto end' one.
  */
 __aligned(4) __s_interrupt __kernel void interrupt_handler(void)
 {
@@ -114,7 +111,23 @@ __aligned(4) __s_interrupt __kernel void interrupt_handler(void)
 		printk("WARN: unknown interrupt just came in...\n");
 	}
 
-end:;
+end:
+	/*
+	 * Here the restoring of the stack will happen, so it's actually not empty.
+	 *
+	 * NOTE: the restore of registers when we switch to another process here is
+	 * actually pretty pointless (we are not 'restoring' anything in the point
+	 * of view of the process we are about to schedule), but we keep the 'sp'
+	 * register sane, at least.
+	 *
+	 * Anyways, when we schedule a process in this kernel we don't actually
+	 * schedule it in the proper sense: we don't return to the last 'pc' for
+	 * that process, but we actually run it from the entry address again. This
+	 * is not relevant for this kernel because in the end our processes only do
+	 * one thing, and 're-starting' is effectively the same in this (silly)
+	 * kernel of ours :)
+	 */
+	;
 }
 
 __kernel void setup_interrupts(void)
