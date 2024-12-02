@@ -4,16 +4,22 @@
 #include <fbos/sched.h>
 #include <fbos/dt.h>
 
-// Stacks to be used by our processes.
-unsigned long stack[4][THREAD_SIZE / sizeof(unsigned long)];
+// Stack to be used by our processes. "Blasphemy!" I hear you say. "How dare you
+// use the same stack for kernel and user space?" It's not like this is some
+// sort of utopian system in which everyone shares everything, but since this
+// stupidly simple kernel does not even bother to implement paging nor any other
+// memory protection of any kind, it's not like separating stacks for each
+// process and kernel space would make much of a difference. Hence, let's keep
+// it simple and have the same stack everwhere.
+uint64_t stack[THREAD_SIZE / sizeof(uint64_t)];
 
 // Initialize the list of structs by providing a fixed stack address and empty
 // values everywhere else.
 struct task_struct tasks[4] = {
-	[TASK_INIT] = { .stack = stack[0], .name = "init", .entry_addr = nullptr, },
-	[TASK_FIZZ] = { .stack = stack[1], .name = "fizz", .entry_addr = nullptr, },
-	[TASK_BUZZ] = { .stack = stack[2], .name = "buzz", .entry_addr = nullptr, },
-	[TASK_FIZZBUZZ] = { .stack = stack[3], .name = "fizzbuzz", .entry_addr = nullptr, },
+	[TASK_INIT] = { .stack = stack, .name = "init", .entry_addr = nullptr, },
+	[TASK_FIZZ] = { .stack = stack, .name = "fizz", .entry_addr = nullptr, },
+	[TASK_BUZZ] = { .stack = stack, .name = "buzz", .entry_addr = nullptr, },
+	[TASK_FIZZBUZZ] = { .stack = stack, .name = "fizzbuzz", .entry_addr = nullptr, },
 };
 
 // Defined in fbos/init.h.

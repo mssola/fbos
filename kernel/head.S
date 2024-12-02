@@ -94,11 +94,13 @@ _start_kernel:
 	li t6, 0
 	csrw sscratch, 0
 
-	// Point tp and sp to the init task. The 'tp' register will always point to
-	// the current process being executed, and it will be shown on debug when
+	// Point 'tp' to the init task. The 'tp' register will always point to the
+	// current process being executed, and it will be shown on debug when
 	// printing out messages.
 	la tp, tasks
-	la sp, tasks + THREAD_SIZE
+
+	// Point 'sp' the our general stack.
+	la sp, stack + THREAD_SIZE
 
 	// The `start_kernel` function requires an argument to be passed, which is
 	// the pointer to the `fdt` blob. The bootloader puts this on the `a1`

@@ -6,13 +6,13 @@
 #include <fbos/sched.h>
 #include <fbos/mm.h>
 
-unsigned long stack[4][THREAD_SIZE / sizeof(unsigned long)];
+unsigned long stack[THREAD_SIZE / sizeof(unsigned long)];
 
 struct task_struct tasks[4] = {
-	[TASK_INIT] = { .stack = stack[0], .entry_addr = NULL, },
-	[TASK_FIZZ] = { .stack = stack[1], .entry_addr = NULL, },
-	[TASK_BUZZ] = { .stack = stack[2], .entry_addr = NULL, },
-	[TASK_FIZZBUZZ] = { .stack = stack[3], .entry_addr = NULL, },
+	[TASK_INIT] = { .stack = stack, .entry_addr = NULL, },
+	[TASK_FIZZ] = { .stack = stack, .entry_addr = NULL, },
+	[TASK_BUZZ] = { .stack = stack, .entry_addr = NULL, },
+	[TASK_FIZZBUZZ] = { .stack = stack, .entry_addr = NULL, },
 };
 
 int main(void)

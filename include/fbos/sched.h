@@ -30,6 +30,9 @@ struct task_struct {
 	const void *entry_addr;
 };
 
+// Instantiated in kernel/main.c.
+extern uint64_t stack[];
+
 // Tasks available on this kernel.
 extern struct task_struct tasks[4];
 
