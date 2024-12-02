@@ -27,3 +27,6 @@ jobs:
 
       - name: Build and run unit tests
         run: make V=1
+
+      - name: Build and run unit tests with DEBUG on
+        run: make V=1 DEBUG=1
