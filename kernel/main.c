@@ -2,6 +2,7 @@
 #include <fbos/printk.h>
 #include <fbos/mm.h>
 #include <fbos/sched.h>
+#include <fbos/string.h>
 #include <fbos/dt.h>
 
 // Stack to be used by our processes. "Blasphemy!" I hear you say. "How dare you
@@ -46,8 +47,8 @@ __noreturn __kernel void start_kernel(void *dtb)
 	// If we were able to fetch the model, print it now.
 	if (info.model[0] != '\0') {
 		printk("Running on: ");
-		printk(info.model);
-		printk("\n");
+		write(info.model, strlen(info.model));
+		write("\n", 1);
 	}
 
 	// At this point everything has already been handled: setup the interrupt
