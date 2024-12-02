@@ -52,7 +52,7 @@ __kernel __always_inline void exception_handler(uint64_t cause)
 		die("Bad syscall\n");
 	}
 
-	write(message, n);
+	sys_write(message, n);
 }
 
 /*
@@ -75,7 +75,7 @@ __aligned(4) __s_interrupt __kernel void interrupt_handler(void)
 
 	if (IS_EXCEPTION(cause)) {
 		exception_handler(cause);
-		set_return_address_to(TASK_INIT);
+		prepare_switch_to(TASK_INIT);
 		goto end;
 	}
 
@@ -91,11 +91,11 @@ __aligned(4) __s_interrupt __kernel void interrupt_handler(void)
 		// BEHOLD! The fizz buzz logic! :D
 		seconds_elapsed += 1;
 		if ((seconds_elapsed % 15) == 0) {
-			set_return_address_to(TASK_FIZZBUZZ);
+			prepare_switch_to(TASK_FIZZBUZZ);
 		} else if ((seconds_elapsed % 5) == 0) {
-			set_return_address_to(TASK_BUZZ);
+			prepare_switch_to(TASK_BUZZ);
 		} else if ((seconds_elapsed % 3) == 0) {
-			set_return_address_to(TASK_FIZZ);
+			prepare_switch_to(TASK_FIZZ);
 		}
 
 		// Re-enable timer interrupts.

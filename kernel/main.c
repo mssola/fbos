@@ -10,10 +10,10 @@ unsigned long stack[4][THREAD_SIZE / sizeof(unsigned long)];
 // Initialize the list of structs by providing a fixed stack address and empty
 // values everywhere else.
 struct task_struct tasks[4] = {
-	[TASK_INIT] = { .stack = stack[0], .entry_addr = nullptr, },
-	[TASK_FIZZ] = { .stack = stack[1], .entry_addr = nullptr, },
-	[TASK_BUZZ] = { .stack = stack[2], .entry_addr = nullptr, },
-	[TASK_FIZZBUZZ] = { .stack = stack[3], .entry_addr = nullptr, },
+	[TASK_INIT] = { .stack = stack[0], .name = "init", .entry_addr = nullptr, },
+	[TASK_FIZZ] = { .stack = stack[1], .name = "fizz", .entry_addr = nullptr, },
+	[TASK_BUZZ] = { .stack = stack[2], .name = "buzz", .entry_addr = nullptr, },
+	[TASK_FIZZBUZZ] = { .stack = stack[3], .name = "fizzbuzz", .entry_addr = nullptr, },
 };
 
 // Defined in fbos/init.h.

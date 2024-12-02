@@ -11,7 +11,7 @@
 #ifdef __KERNEL__
 extern void die(const char *const message);
 extern void printk(const char *const message);
-extern void write(const char *const message, size_t n);
+extern void sys_write(const char *const message, size_t n);
 #else
 #include <stdio.h>
 #include <stdlib.h>
