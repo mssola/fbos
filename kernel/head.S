@@ -27,9 +27,9 @@ _start:
 	// Ensure alignment for the next double word.
 	.balign 8
 
-	// Load offset. Note that this matches the PAGE_OFFSET as defined in
+	// Load offset. Note that this matches the LOAD_BASE_OFFSET as defined in
 	// `include/mm.h`.
-	.dword 0x200000
+	.dword LOAD_BASE_OFFSET
 
 	// Size of the image. This is *mandatory* as per bootloader request.
 	.dword _end - _start

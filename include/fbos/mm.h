@@ -12,10 +12,11 @@
 
 /*
  * The code will be linked to start at the first page, which will have a given
- * offset.
+ * offset from the base address where a kernel can be allocated on a RISC-V
+ * machine.
  */
-
-#define PAGE_OFFSET 0x80200000
-#define LOAD_OFFSET PAGE_OFFSET
+#define LOAD_BASE_ADDR 0x80000000
+#define LOAD_BASE_OFFSET 0x00200000
+#define LOAD_OFFSET (LOAD_BASE_ADDR + LOAD_BASE_OFFSET)
 
 #endif /* __FBOS_MM_H */
