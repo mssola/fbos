@@ -134,6 +134,8 @@ things simple. Hence, here there are some limitations/requirements:
   target, and that's what you are supposed to be passing to the kernel.
 - RISC-V is ambivalent on the endianness. Not this kernel. Out of simplicity we
   require a little-endian RISC-V system.
+- This kernel makes use of the `Zaamo` Extension for Atomic Memory Operations,
+  which is included under the `A` Extension for Atomic Instructions.
 
 ## Special thanks to
 

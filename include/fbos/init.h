@@ -11,7 +11,7 @@
 // This greatly simplifies the specification and the hardware, but for the
 // kernel this means that harts will appear randomly. In order to know which
 // hart runs first, in Linux they run a "lottery": an atomic value holds how
-// many harts hav already been seen. The first hart to appear will actually
+// many harts have already been seen. The first hart to appear will actually
 // initialize things before bringing the others up, while the others will simply
 // wait until the first hart frees the lock for them.
 //
