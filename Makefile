@@ -148,9 +148,11 @@ archive: all
 ##
 # Hacking
 
+CPUS ?= 4
+
 .PHONY: qemu
 qemu: clean $(IMAGE) usr
-	$(Q) $(QEMU) $(QEMU_FLAGS) -machine virt -kernel $(IMAGE) -initrd $(INIT)
+	$(Q) $(QEMU) $(QEMU_FLAGS) -machine virt -smp $(CPUS) -kernel $(IMAGE) -initrd $(INIT)
 
 .PHONY: gdb
 gdb:

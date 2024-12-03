@@ -63,6 +63,23 @@ _start_kernel:
 	// Flush the instruction cache
 	fence.i
 
+	// Run the hart lottery. If this is not the first time that it happens, then
+	// stall this hart forever: on this simple kernel we only want one hart
+	// available to avoid SMP shenanigans. See explanation on fbos/init.h.
+	la a3, hart_lottery
+	li a2, 1
+	amoadd.w a3, a2, (a3)
+	beqz a3, .Lhart_proceed
+.Lhart_wait:
+	wfi
+	j .Lhart_wait
+
+.Lhart_proceed:
+	// Store the hart id as we will tamper with the 'a0' register later when
+	// performing the call to `start_kernel`.
+	la a3, hart_id
+	sw a0, 0(a3)
+
 	// Reset all registers except ra, a0, a1.
 	li sp, 0
 	li gp, 0

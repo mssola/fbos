@@ -3,7 +3,7 @@
 #include <fbos/string.h>
 #include <fbos/sbi.h>
 
-void __noreturn __kernel die(const char *const message)
+__kernel __noreturn void die(const char *const message)
 {
 	if (message) {
 		printk(message);
@@ -11,6 +11,19 @@ void __noreturn __kernel die(const char *const message)
 
 	for (;;)
 		;
+}
+
+__kernel void print_digit(uint32_t digit)
+{
+	char buffer[2];
+
+	if (digit > 9) {
+		die("We cannot print numbers with two or more digits :D\n");
+	}
+
+	buffer[0] = '0' + digit;
+	buffer[1] = '\0';
+	write(buffer, 2);
 }
 
 __kernel void write(const char *const message, size_t n)

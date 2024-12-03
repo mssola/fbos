@@ -39,6 +39,11 @@ typedef unsigned long size_t;
 typedef unsigned long uint64_t;
 typedef unsigned long uintptr_t;
 
+// Strong type for atomic integer operations.
+typedef struct {
+	int32_t value;
+} atomic32_t;
+
 /*
  * NULL
  */

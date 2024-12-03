@@ -5,6 +5,12 @@
 #include <fbos/string.h>
 #include <fbos/dt.h>
 
+/*
+ * Data related to harts and set by kernel/head.S. Defined in fbos/init.h.
+ */
+atomic32_t hart_lottery __section(".sdata");
+uint32_t hart_id;
+
 // Stack to be used by our processes, which is initialized in head.S.
 // "Blasphemy!" I hear you say. "How dare you use the same stack for kernel and
 // user space?" It's not like this is some sort of utopian system in which
@@ -51,6 +57,11 @@ __noreturn __kernel void start_kernel(void *dtb)
 		write(info.model, strlen(info.model));
 		write("\n", 1);
 	}
+
+	// And print the hart ID where this is being run.
+	printk("Running on Hart ID: ");
+	print_digit(hart_id);
+	write("\n", 1);
 
 	// At this point everything has already been handled: setup the interrupt
 	// vector and enable the timer to start ticking and scheduling the three
