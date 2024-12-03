@@ -2,16 +2,13 @@
 #define __FBOS_MM_H
 
 /*
- * Page = 4KB.
+ * Page = 4KB. We don't actually use pagination, but this value is still useful
+ * when aligning in the linker file.
  */
 #define PAGE_SIZE 0x1000
 
-/*
- * Initial size of the thread, which coincides with the size of the stack for a
- * given thread.
- */
-#define THREAD_SIZE_ORDER 2
-#define THREAD_SIZE (PAGE_SIZE << THREAD_SIZE_ORDER)
+// Size of the stack as used by processes on this kernel.
+#define STACK_SIZE PAGE_SIZE
 
 /*
  * The code will be linked to start at the first page, which will have a given

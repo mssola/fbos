@@ -100,7 +100,7 @@ _start_kernel:
 	la tp, tasks
 
 	// Point 'sp' the our general stack.
-	la sp, stack + THREAD_SIZE
+	la sp, stack + STACK_SIZE
 
 	// The `start_kernel` function requires an argument to be passed, which is
 	// the pointer to the `fdt` blob. The bootloader puts this on the `a1`

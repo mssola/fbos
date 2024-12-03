@@ -12,7 +12,7 @@
 // memory protection of any kind, it's not like separating stacks for each
 // process and kernel space would make much of a difference. Hence, let's keep
 // it simple and have the same stack everwhere.
-uint64_t stack[THREAD_SIZE / sizeof(uint64_t)];
+uint64_t stack[STACK_SIZE / sizeof(uint64_t)];
 
 // Initialize the list of structs by providing a fixed stack address and empty
 // values everywhere else.
