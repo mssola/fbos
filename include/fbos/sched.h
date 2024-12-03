@@ -17,12 +17,6 @@ enum task_id {
 
 // All the information we need to grab for processes.
 struct task_struct {
-	// The stack allocated for the process. As you can see when initializing
-	// each process on `kernel/main.c`, we go over the top for its size. There
-	// is also the fact that we need to keep this as the first attribue to allow
-	// for simple `sp` values.
-	void *stack;
-
 	// Name of the task to be printed for debugging purposes.
 	const char name[TASK_NAME_LEN];
 
