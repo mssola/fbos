@@ -69,46 +69,17 @@ _start_kernel:
 	la a3, hart_lottery
 	li a2, 1
 	amoadd.w a3, a2, (a3)
-	beqz a3, .Lhart_proceed
-.Lhart_wait:
-	wfi
-	j .Lhart_wait
+	bnez a3, .Lhart_wait
 
-.Lhart_proceed:
 	// Store the hart id as we will tamper with the 'a0' register later when
 	// performing the call to `start_kernel`.
 	la a3, hart_id
 	sw a0, 0(a3)
 
-	// Reset all registers except ra, a0, a1.
-	li sp, 0
+	// Explicitely nullify the 'gp' and 'sscratch' registers, as they are a bit
+	// special but we are not using them. For the rest of the registers, we
+	// explicitely do not care to reset them.
 	li gp, 0
-	li tp, 0
-	li t0, 0
-	li t1, 0
-	li t2, 0
-	li s0, 0
-	li s1, 0
-	li a2, 0
-	li a3, 0
-	li a4, 0
-	li a5, 0
-	li a6, 0
-	li a7, 0
-	li s2, 0
-	li s3, 0
-	li s4, 0
-	li s5, 0
-	li s6, 0
-	li s7, 0
-	li s8, 0
-	li s9, 0
-	li s10, 0
-	li s11, 0
-	li t3, 0
-	li t4, 0
-	li t5, 0
-	li t6, 0
 	csrw sscratch, 0
 
 	// Point 'tp' to the init task. The 'tp' register will always point to the
@@ -116,7 +87,7 @@ _start_kernel:
 	// printing out messages.
 	la tp, tasks
 
-	// Point 'sp' the our general stack.
+	// Point 'sp' the our global stack. See fbos/sched.h for more details.
 	la sp, stack + STACK_SIZE
 
 	// The `start_kernel` function requires an argument to be passed, which is
@@ -127,6 +98,13 @@ _start_kernel:
 	// Start the kernel.
 	tail start_kernel
 
-	// We really shouldn't reach this point, but just in case, just loop
-	// infinitely here.
-	j .
+	// We really shouldn't reach this point. If so, at least mask again all
+	// interrupts, flush the instruction cache and halt the current hart.
+	csrw sie, zero
+	csrw sip, zero
+	fence.i
+
+	// This is where harts come to die :)
+.Lhart_wait:
+	wfi
+	j .Lhart_wait
