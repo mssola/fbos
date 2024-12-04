@@ -50,7 +50,11 @@ void extract_initrd(const unsigned char *const base_addr, uint64_t size,
 // Setup the interrupt vectors and the SBI timer.
 void setup_interrupts(void);
 
-// The entry point for the kernel.
+/*
+ * This is the main entry point of the kernel after head.S is done. This
+ * function can (and will) assume that everything has been reset and that we can
+ * start the whole thing.
+ */
 void start_kernel(void *dtb);
 
 #endif /* __FBOS_INIT_H */

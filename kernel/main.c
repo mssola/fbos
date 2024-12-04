@@ -11,18 +11,10 @@
 atomic32_t hart_lottery __section(".sdata");
 uint32_t hart_id;
 
-// Stack to be used by our processes, which is initialized in head.S.
-// "Blasphemy!" I hear you say. "How dare you use the same stack for kernel and
-// user space?" It's not like this is some sort of utopian system in which
-// everyone shares everything, but since this stupidly simple kernel does not
-// even bother to implement paging nor any other memory protection of any kind,
-// it's not like separating stacks for each process and kernel space would make
-// much of a difference. Hence, let's keep it simple and have the same stack
-// everwhere.
+// Defined in fbos/sched.h.
 uint64_t stack[STACK_SIZE / sizeof(uint64_t)];
 
-// Initialize the list of structs by providing a fixed stack address and empty
-// values everywhere else.
+// Defined in fbos/sched.h.
 struct task_struct tasks[4] = {
 	[TASK_INIT] = { .name = "init", .entry_addr = nullptr, },
 	[TASK_FIZZ] = { .name = "fizz", .entry_addr = nullptr, },
@@ -38,11 +30,6 @@ struct dt_info info = {
 	.initrd_end = 0,
 };
 
-/*
- * This is the main entry point of the kernel after head.S is done. This
- * function can (and will) assume that everything has been reset and that we can
- * start the whole thing.
- */
 __noreturn __kernel void start_kernel(void *dtb)
 {
 	printk("Welcome to FizzBuzz OS!\n");

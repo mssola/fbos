@@ -39,6 +39,11 @@ __kernel void time_out_in_one_second(void)
 	}
 }
 
+/*
+ * Exception handler. For this kernel, it only ensures that the 'write' system
+ * call is the one responsible for this exception and handles it; otherwise it
+ * will die.
+ */
 __kernel __always_inline void exception_handler(uint64_t cause)
 {
 	register char *message asm("a0");

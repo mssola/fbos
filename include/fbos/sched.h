@@ -24,15 +24,28 @@ struct task_struct {
 	const void *entry_addr;
 };
 
-// Instantiated in kernel/main.c.
+/*
+ * Stack to be used by our processes, which is initialized in head.S.
+ * "Blasphemy!" I hear you say. "How dare you use the same stack for kernel and
+ * user space?" It's not like this is some sort of utopian system in which
+ * everyone shares everything, but since this stupidly simple kernel does not\
+ * even bother to implement paging nor any other memory protection of any kind,
+ * it's not like separating stacks for each process and kernel space would make
+ * much of a difference. Hence, let's keep it simple and have the same stack
+ * everwhere.
+ *
+ * Instantiated in kernel/main.c.
+ */
 extern uint64_t stack[];
 
-// Tasks available on this kernel.
+// Tasks available on this kernel. Instantiated in kernel/main.c
 extern struct task_struct tasks[4];
 
-// Prepare for switching to the given task. Note that this will not actually
-// jump into the given task, but it will prepare the relevant registers before
-// performing the actual jump.
+/*
+ * Prepare for switching to the given task. Note that this will not actually
+ * jump into the given task, but it will prepare the relevant registers before
+ * performing the actual jump.
+ */
 __kernel __always_inline void prepare_switch_to(int task_id)
 {
 	register struct task_struct *current asm("tp");
