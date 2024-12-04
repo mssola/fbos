@@ -5,11 +5,8 @@
 #include <fbos/string.h>
 #include <fbos/dt.h>
 
-/*
- * Data related to harts and set by kernel/head.S. Defined in fbos/init.h.
- */
+// Defined in fbos/init.h.
 atomic32_t hart_lottery __section(".sdata");
-uint32_t hart_id;
 
 // Defined in fbos/sched.h.
 uint64_t stack[STACK_SIZE / sizeof(uint64_t)];
@@ -30,7 +27,7 @@ struct dt_info info = {
 	.initrd_end = 0,
 };
 
-__noreturn __kernel void start_kernel(void *dtb)
+__noreturn __kernel void start_kernel(uint64_t hart_id, void *dtb)
 {
 	printk("Welcome to FizzBuzz OS!\n");
 

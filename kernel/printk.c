@@ -13,7 +13,7 @@ __kernel __noreturn void die(const char *const message)
 		;
 }
 
-__kernel void print_digit(uint32_t digit)
+__kernel void print_digit(uint64_t digit)
 {
 	char buffer[2];
 

@@ -25,11 +25,6 @@
 // Instantiated in kernel/main.c
 extern atomic32_t hart_lottery;
 
-// ID of the hart that is running the show.
-//
-// Instantiated in kernel/main.c
-extern uint32_t hart_id;
-
 // Tracks the amount of seconds that have elapsed since activating timer
 // interrupts.
 //
@@ -52,9 +47,9 @@ void setup_interrupts(void);
 
 /*
  * This is the main entry point of the kernel after head.S is done. This
- * function can (and will) assume that everything has been reset and that we can
- * start the whole thing.
+ * function expects exactly two arguments, which are exactly the same as they
+ * are passed to the `_start` function in kernel/head.S by the bootloader.
  */
-void start_kernel(void *dtb);
+void start_kernel(uint64_t hart_id, void *dtb);
 
 #endif /* __FBOS_INIT_H */

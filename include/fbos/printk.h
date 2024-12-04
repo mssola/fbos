@@ -13,7 +13,7 @@
 extern void die(const char *const message);
 
 // Print the given number as a single digit.
-extern void print_digit(uint32_t digit);
+extern void print_digit(uint64_t digit);
 
 // Print the given message.
 extern void printk(const char *const message);

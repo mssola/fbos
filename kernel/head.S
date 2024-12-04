@@ -71,11 +71,6 @@ _start_kernel:
 	amoadd.w a3, a2, (a3)
 	bnez a3, .Lhart_wait
 
-	// Store the hart id as we will tamper with the 'a0' register later when
-	// performing the call to `start_kernel`.
-	la a3, hart_id
-	sw a0, 0(a3)
-
 	// Explicitely nullify the 'gp' and 'sscratch' registers, as they are a bit
 	// special but we are not using them. For the rest of the registers, we
 	// explicitely do not care to reset them.
@@ -90,12 +85,12 @@ _start_kernel:
 	// Point 'sp' the our global stack. See fbos/sched.h for more details.
 	la sp, stack + STACK_SIZE
 
-	// The `start_kernel` function requires an argument to be passed, which is
-	// the pointer to the `fdt` blob. The bootloader puts this on the `a1`
-	// register, so let's move it now to `a0`.
-	mv a0, a1
-
-	// Start the kernel.
+	// Start the kernel. Notice that both 'a0' and 'a1' have been left
+	// untouched. This is no coincidence as the values as passed from the
+	// bootloader for both these two registers will be passed down to the kernel
+	// as is. As with the Linux kernel these two registers contain:
+	//   - a0: boot hart id.
+	//   - a1: pointer to the flattened device tree blob.
 	tail start_kernel
 
 	// We really shouldn't reach this point. If so, at least mask again all
