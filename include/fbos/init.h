@@ -22,6 +22,12 @@
 // full speed. Actually, keeping things under a single hart simplifies things a
 // lot.
 //
+// Also note that on both platforms I have tested this they had the HSM
+// extension from the SBI specification. In this case, only one hart is woken
+// up, and it's up to the supervisor to wake up the others through the HSM
+// extension. Hence, for the platforms I have tried this the lottery was rigged
+// from the beginning :)
+//
 // Instantiated in kernel/main.c
 extern atomic32_t hart_lottery;
 
