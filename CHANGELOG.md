@@ -1,3 +1,11 @@
+# v1.0
+
+- The kernel can run on real hardware. I have tested this on Starfive Visionfive
+  2 v1.3B.
+- The kernel takes care of SMP more gracefully (by explicitely forbidding more
+  than one hart running at the same time).
+- The kernel has been stripped down from unneeded complexity.
+
 # State of the project by the end of SUSE Hackweek 2024
 
 As part of [SUSE Hack Week
